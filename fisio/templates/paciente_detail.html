@@ -1,0 +1,10 @@
+<h2>Detalle del Paciente</h2>
+<p><strong>Nombre:</strong> {{ paciente.nombre }}</p>
+<p><strong>Apellido:</strong> {{ paciente.apellido }}</p>
+<p><strong>Fecha de Nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
+<p><strong>Celular:</strong> {{ paciente.celular }}</p>
+<p><strong>Diagnóstico Médico:</strong> {{ paciente.diagnostico_medico }}</p>
+
+<a href="{% url 'paciente_update' paciente.id %}">Editar</a>
+<a href="{% url 'paciente_delete' paciente.id %}">Eliminar</a>
+<a href="{% url 'paciente_list' %}">Volver a la lista</a>

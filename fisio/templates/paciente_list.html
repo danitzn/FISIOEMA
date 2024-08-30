@@ -1,0 +1,7 @@
+<h2>Lista de Pacientes</h2>
+<a href="{% url 'paciente_create' %}">Nuevo Paciente</a>
+<ul>
+    {% for paciente in pacientes %}
+        <li><a href="{% url 'paciente_detail' paciente.id %}">{{ paciente.nombre }} {{ paciente.apellido }}</a></li>
+    {% endfor %}
+</ul>
