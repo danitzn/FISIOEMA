@@ -231,3 +231,22 @@ class PagoServicio(models.Model):
 
     def __str__(self):
         return f"Pago de {self.servicio.nombre} - {self.pago.fecha}"
+from django.contrib.auth.models import User
+from django.db import models
+
+#perfiles de usuario
+
+class Perfil(models.Model):
+    USER_TYPES = (
+        ('ADMINISTRADOR', 'Administrador'),
+        ('PROFESIONAL', 'Profesional'),
+        ('PACIENTE', 'Paciente'),
+        ('ADMINISTRATIVO', 'Administrativo'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20, choices=USER_TYPES)
+    nro_documento = models.CharField(max_length=20, unique=True)
+    
+    def __str__(self):
+        return f'{self.user.username} - {self.get_tipo_display()}'

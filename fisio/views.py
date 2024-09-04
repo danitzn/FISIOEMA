@@ -1,8 +1,11 @@
 # views.py
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Paciente, Profesional
-from .forms import PacienteForm, ProfesionalForm
+from .forms import PacienteForm, ProfesionalForm, RegistroForm
+from django.contrib.auth import login, authenticate
+from .forms import RegistroForm
 
 
 # Paciente Views
@@ -60,3 +63,71 @@ class ProfesionalDeleteView(DeleteView):
     model = Profesional
     template_name = 'profesional_confirm_delete.html'
     success_url = reverse_lazy('profesional_list')
+
+
+#perfiles de usuario def
+
+def registro(request):
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = RegistroForm()
+    return render(request, 'registro.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            
+            error_message = "Fallo autenticacion, favor contactar con administrador del sistema"
+            return render(request, 'login.html', {'error_message': error_message})
+    return render(request, 'login.html')
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+#decorador administrador
+def es_administrador(user):
+    return user.perfil.tipo == 'ADMINISTRADOR'
+
+@login_required
+@user_passes_test(es_administrador)
+def vista_administrador(request):
+    # Lógica para el administrador
+    pass
+
+
+#dashboard prueba
+def es_administrador(user):
+    return user.perfil.tipo == 'ADMINISTRADOR'
+
+def es_profesional(user):
+    return user.perfil.tipo == 'PROFESIONAL'
+
+def es_paciente(user):
+    return user.perfil.tipo == 'PACIENTE'
+
+def es_administrativo(user):
+    return user.perfil.tipo == 'ADMINISTRATIVO'
+
+@login_required
+def dashboard_view(request):
+    perfil = request.user.perfil.tipo
+    
+    if perfil == 'ADMINISTRADOR':
+        return render(request, 'dashboard_administrador.html')
+    elif perfil == 'PROFESIONAL':
+        return render(request, 'dashboard_profesional.html')
+    elif perfil == 'PACIENTE':
+        return render(request, 'dashboard_paciente.html')
+    elif perfil == 'ADMINISTRATIVO':
+        return render(request, 'dashboard_administrativo.html')
+    else:
+        return render(request, 'dashboard_generico.html')
