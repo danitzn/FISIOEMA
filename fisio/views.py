@@ -6,7 +6,7 @@ from .models import Paciente, Profesional
 from .forms import PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
-
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 # Paciente Views
 class PacienteListView(ListView):
@@ -73,9 +73,12 @@ def registro(request):
         if form.is_valid():
             form.save()
             return redirect('login')
+        else:
+            error_message = 'Corrige los errores en el formulario.'
     else:
         form = RegistroForm()
-    return render(request, 'registro.html', {'form': form})
+        error_message = ''
+    return render(request, 'registro.html', {'form': form, 'error_message': error_message})
 
 def login_view(request):
     if request.method == 'POST':
@@ -91,7 +94,7 @@ def login_view(request):
             return render(request, 'login.html', {'error_message': error_message})
     return render(request, 'login.html')
 
-from django.contrib.auth.decorators import login_required, user_passes_test
+
 
 #decorador administrador
 def es_administrador(user):
@@ -131,3 +134,17 @@ def dashboard_view(request):
         return render(request, 'dashboard_administrativo.html')
     else:
         return render(request, 'dashboard_generico.html')
+    
+    #home prueba
+def home(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')  # Cambia esto a la página del dashboard si es necesario
+        else:
+            error_message = "Fallo de autenticación, verifica tus datos."
+            return render(request, 'login.html', {'error_message': error_message})
+    return render(request, 'login.html')

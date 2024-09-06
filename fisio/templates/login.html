@@ -1,6 +1,36 @@
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Usuario">
-    <input type="password" name="password" placeholder="Clave">
-    <button type="submit">Iniciar Sesión</button>
-</form>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>FISIOEMA - Ingreso</title>
+</head>
+<body class="bg-lila-light flex items-center justify-center h-screen">
+    <div class="w-full max-w-sm mx-auto p-8 bg-white shadow-lg rounded-lg">
+        <div class="text-center">
+            <!-- <img src="{% static 'images/logo_fisioema.png' %}" alt="Logo FISIOEMA" class="h-20 mx-auto"> -->
+            <h1 class="text-2xl font-semibold text-gray-700 mt-4">Bienvenido a FISIOEMA</h1>
+        </div>
+        <form method="post" class="mt-6">
+            {% csrf_token %}
+            {% if error_message %}
+                <p class="text-red-500">{{ error_message }}</p>
+            {% endif %}
+            <div class="mb-4">
+                <input type="text" name="username" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Usuario" required>
+            </div>
+            <div class="mb-6">
+                <input type="password" name="password" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Contraseña" required>
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700">Ingresar</button>
+                <a href="{% url 'registro' %}">
+                    <button type="button" class="w-full bg-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-400 mt-2">Registro</button>
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

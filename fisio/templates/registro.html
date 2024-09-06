@@ -1,4 +1,6 @@
+{% load static %}
 <form method="POST">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Registrar</button>

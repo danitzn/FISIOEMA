@@ -3,23 +3,20 @@ from django import forms
 from .models import Paciente, Profesional
 from django.contrib.auth.models import User
 from .models import Perfil
+from django.core.validators import validate_email
 
 class RegistroForm(forms.ModelForm):
+    email = forms.EmailField(required=True, validators=[validate_email])
+
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
 
-    perfil = forms.ChoiceField(choices=Perfil.USER_TYPES)
-    nro_documento = forms.CharField(max_length=20)
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])
-        if commit:
-            user.save()
-            Perfil.objects.create(user=user, tipo=self.cleaned_data['perfil'], nro_documento=self.cleaned_data['nro_documento'])
-        return user
-
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('El correo ya está registrado.')
+        return email
 
 class PacienteForm(forms.ModelForm):
     fecha_nacimiento = forms.DateField(

@@ -1,0 +1,100 @@
+/* Colores base */
+:root {
+    --lila-claro: #D1C4E9;
+    --lila-oscuro: #512DA8;
+    --blanco: #FFFFFF;
+    --gris-suave: #F5F5F5;
+    --gris-oscuro: #333;
+}
+
+/* Estilo global */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--gris-suave);
+    color: var(--gris-oscuro);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+h1, h2, h3 {
+    color: var(--lila-oscuro);
+}
+
+/* Cuadros bordeados */
+.container {
+    background-color: var(--blanco);
+    border: 2px solid var(--lila-claro);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Estilos para botones */
+button {
+    background-color: var(--lila-oscuro);
+    color: var(--blanco);
+    padding: 8px 16px; /* Reducido para hacer el botón más pequeño */
+    border: none;
+    border-radius: 20px; /* Bordes menos invasivos */
+    font-size: 1em; /* Tamaño de texto reducido */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+button:hover {
+    background-color: var(--lila-claro);
+    color: var(--gris-oscuro);
+    transform: scale(1.05); /* Animación sutil en hover */
+}
+
+/* Inputs personalizados */
+input {
+    width: 100%;
+    padding: 10px 15px; /* Padding reducido */
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid var(--lila-oscuro);
+    border-radius: 20px; /* Bordes menos redondeados */
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    border-color: var(--lila-claro);
+    outline: none;
+}
+
+/* Estilo para los formularios */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
+}
+
+/* Diseño de imagen/logo */
+img {
+    max-height: 100px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.1);
+}
+
+/* Footer y detalles adicionales */
+footer {
+    margin-top: 40px;
+    text-align: center;
+    color: var(--gris-oscuro);
+    font-size: 0.9em;
+}

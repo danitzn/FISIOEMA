@@ -1,11 +1,12 @@
 # urls.py
 from django import views
 from django.urls import path
+# from . import views
 from fisio.views import (
     PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
-    ProfesionalUpdateView, ProfesionalDeleteView, dashboard_view,registro,login_view,
+    ProfesionalUpdateView, ProfesionalDeleteView, dashboard_view, home,registro,login_view,
 )
 
 urlpatterns = [
@@ -25,7 +26,10 @@ urlpatterns = [
 
     # Usuario URLs
     path('registro/', registro, name='registro'),
-    path('login/', login_view, name='login'),
+    # path('login/', login_view, name='login'),
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('', home, name='home'),  # Página de inicio (login)
+    path('login/', home, name='login'),
+    
 ]
 
