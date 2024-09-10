@@ -2,6 +2,7 @@
 from django import views
 from django.urls import path
 # from . import views
+from django.contrib import admin
 from fisio.views import (
     PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
@@ -25,6 +26,7 @@ urlpatterns = [
     path('profesionales/<int:pk>/eliminar/', ProfesionalDeleteView.as_view(), name='profesional_delete'),
 
     # Usuario URLs
+    path('admin/', admin.site.urls),
     path('registro/', registro, name='registro'),
     # path('login/', login_view, name='login'),
     path('dashboard/', dashboard_view, name='dashboard'),
