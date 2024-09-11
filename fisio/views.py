@@ -7,6 +7,7 @@ from .forms import PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 
 # Paciente Views
 class PacienteListView(ListView):
@@ -72,13 +73,14 @@ def registro(request):
         form = RegistroForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            messages.success(request, 'Usuario registrado correctamente.')
+            return redirect('login')  # Redirigir a la página de inicio de sesión después del registro
         else:
-            error_message = 'Corrige los errores en el formulario.'
+            messages.error(request, 'Por favor, corrija los errores.')
     else:
         form = RegistroForm()
-        error_message = ''
-    return render(request, 'registro.html', {'form': form, 'error_message': error_message})
+    
+    return render(request, 'registro.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
