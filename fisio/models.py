@@ -36,7 +36,9 @@ class Servicio(models.Model):
 
     def __str__(self):
         return self.nombre
+    
 
+#datos del profesional
 class Profesional(models.Model):
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
@@ -45,14 +47,22 @@ class Profesional(models.Model):
     correo = models.EmailField()
     fecha_registro = models.DateField(auto_now_add=True)
     sexo = models.CharField(max_length=10, choices=[('M', 'Masculino'), ('F', 'Femenino')])
-    tipo_profesional = models.CharField(max_length=50)
+    tipo_profesional = models.ForeignKey('self',on_delete=models.CASCADE, related_name='profesionales')
     activo = models.BooleanField(default=True)
-    # responsable_area = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinados')
-    responsable_area = models.CharField(max_length=255)
+    responsable_area = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinados')
+    
 
     def __str__(self):
         return f"{self.nombre} {self.apellidos}"
+#datos del horario de atencion de los profesionales
+class HorarioAtencion(models.Model):
+    profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE, related_name='horarios_atencion')
+    dia = models.CharField(max_length=20)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
 
+    def __str__(self):
+        return f"{self.dia} ({self.hora_inicio}-{self.hora_fin})"
 class Agendamiento(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='agendamientos')
     fecha = models.DateField()

@@ -2,8 +2,8 @@
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Paciente, Profesional
-from .forms import PacienteForm, ProfesionalForm, RegistroForm
+from .models import Agendamiento, Paciente, Profesional
+from .forms import AgendaminentoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -150,3 +150,9 @@ def home(request):
             error_message = "Fallo de autenticación, verifica tus datos."
             return render(request, 'login.html', {'error_message': error_message})
     return render(request, 'login.html')
+
+def AgendamientoCreateView(CreateView):
+    model = Agendamiento
+    form_class = AgendaminentoForm
+    template_name = 'agendamiento_form.html'
+    success_url = reverse_lazy('agendamiento_list')
