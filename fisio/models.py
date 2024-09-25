@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Direccion(models.Model):
     domicilio = models.CharField(max_length=100)
@@ -47,9 +48,9 @@ class Profesional(models.Model):
     correo = models.EmailField()
     fecha_registro = models.DateField(auto_now_add=True)
     sexo = models.CharField(max_length=10, choices=[('M', 'Masculino'), ('F', 'Femenino')])
-    tipo_profesional = models.ForeignKey('self',on_delete=models.CASCADE, related_name='profesionales')
     activo = models.BooleanField(default=True)
-    responsable_area = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinados')
+    # responsable_area = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinados')
+    responsable_area = models.CharField(max_length=50)
     
 
     def __str__(self):
@@ -63,16 +64,33 @@ class HorarioAtencion(models.Model):
 
     def __str__(self):
         return f"{self.dia} ({self.hora_inicio}-{self.hora_fin})"
+    
+
+
 class Agendamiento(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente de Confirmación'),
+        ('confirmado', 'Confirmado'),
+        ('reprogramado', 'Reprogramado'),
+        ('cancelado_paciente', 'Cancelado por el Paciente'),
+        ('cancelado_profesional', 'Cancelado por el Profesional'),
+        ('no_asistido', 'No Asistido'),
+        ('en_curso', 'En Curso'),
+        ('finalizado', 'Finalizado'),
+    ]
+    
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='agendamientos')
     fecha = models.DateField()
     hora = models.TimeField()
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='agendamientos')
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE, related_name='agendamientos')
-    estado = models.CharField(max_length=20)
+    estado = models.CharField(max_length=30, choices=ESTADOS, default='pendiente')
 
     def __str__(self):
-        return f"{self.fecha} {self.hora} - {self.paciente}"
+        return f"{self.fecha} {self.hora} - {self.paciente} ({self.estado})"
+
+
+
 
 class Evaluacion(models.Model):
     agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='evaluaciones')
@@ -241,8 +259,6 @@ class PagoServicio(models.Model):
 
     def __str__(self):
         return f"Pago de {self.servicio.nombre} - {self.pago.fecha}"
-from django.contrib.auth.models import User
-from django.db import models
 
 #perfiles de usuario
 
@@ -260,3 +276,5 @@ class Perfil(models.Model):
     
     def __str__(self):
         return f'{self.user.username} - {self.get_tipo_display()}'
+
+

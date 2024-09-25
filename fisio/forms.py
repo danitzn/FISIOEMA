@@ -75,19 +75,23 @@ class PacienteForm(forms.ModelForm):
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'block w-full px-4 py-2 border rounded-lg', 'placeholder': 'dd/mm/aaaa'}),
         }
 
-class AgendaminentoForm (forms.ModelForm):
-    fecha = forms.DateField(
-        widget=forms.DateInput(format='%d/%m/%Y'),
-        input_formats=['%d/%m/%Y']
-    )
-    
+from django import forms
+from .models import Agendamiento
+
+class AgendamientoForm(forms.ModelForm):
     class Meta:
         model = Agendamiento
-        fields = '__all__'
+        fields = ['paciente', 'fecha', 'hora', 'servicio', 'profesional']
+        
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'block w-full px-4 py-2 border rounded-lg', 'placeholder': 'dd/mm/aaaa'}),
-            'hora': forms.TimeInput(attrs={'class': 'block w-full px-4 py-2 border rounded-lg', 'placeholder': 'hh:mm'}),
+            'paciente': forms.Select(attrs={'class': 'form-control'}),
+            'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'servicio': forms.Select(attrs={'class': 'form-control'}),
+            'profesional': forms.Select(attrs={'class': 'form-control'}),
+            # 'estado': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
 
 class ProfesionalForm(forms.ModelForm):
     class Meta:

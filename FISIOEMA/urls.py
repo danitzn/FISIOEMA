@@ -4,7 +4,7 @@ from django.urls import path
 # from . import views
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, ConfirmacionAgendamientoView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
     ProfesionalUpdateView, ProfesionalDeleteView, dashboard_view, home,registro,login_view,
@@ -25,10 +25,13 @@ urlpatterns = [
     path('profesionales/<int:pk>/editar/', ProfesionalUpdateView.as_view(), name='profesional_update'),
     path('profesionales/<int:pk>/eliminar/', ProfesionalDeleteView.as_view(), name='profesional_delete'),
 
-    # Agendamiento URLs
-    # path('agendamientos/', AgendamientoListView.as_view(), name='agendamiento_list'),
-    # path('agendamientos/<int:pk>/', AgendamientoDetailView.as_view(), name='agendamiento_detail'),
-    # path('agendamientos/nuevo/', AgendamientoCreateView.as_view(), name='agendamiento_create'),
+    #Agendamiento URLs
+    path('agendamientos/', AgendamientoListView.as_view(), name='agendamiento_list'),
+    path('agendamientos/<int:pk>/', AgendamientoDetailView.as_view(), name='agendamiento_detail'),
+    path('agendamientos/nuevo/', AgendamientoCreateView.as_view(), name='agendamiento_create'),
+
+    # path('agendamientos/nuevo/', AgendamientoCreateView.as_view(), name='agendamiento_nuevo'),
+    path('agendamientos/confirmacion/', ConfirmacionAgendamientoView.as_view(), name='confirmacion_agendamiento'),
 
 
     # Usuario URLs

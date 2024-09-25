@@ -1,9 +1,9 @@
 # views.py
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Agendamiento, Paciente, Profesional
-from .forms import AgendaminentoForm, PacienteForm, ProfesionalForm, RegistroForm
+from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -151,8 +151,27 @@ def home(request):
             return render(request, 'login.html', {'error_message': error_message})
     return render(request, 'login.html')
 
-def AgendamientoCreateView(CreateView):
+class AgendamientoCreateView(CreateView):
     model = Agendamiento
-    form_class = AgendaminentoForm
+    form_class = AgendamientoForm
     template_name = 'agendamiento_form.html'
-    success_url = reverse_lazy('agendamiento_list')
+    success_url = reverse_lazy('confirmacion_agendamiento')
+
+    def form_valid(self, form):
+        # Establecer el estado automáticamente a 'Pendiente de Confirmación'
+        form.instance.estado = 'Pendiente de Confirmación'
+        return super().form_valid(form)
+    
+class ConfirmacionAgendamientoView(TemplateView):
+    template_name = 'confirmacion_agendamiento.html'
+
+class AgendamientoListView(ListView):
+    model = Agendamiento
+    template_name = 'agendamiento_list.html'
+    context_object_name = 'agendamientos'
+
+# Vista para ver detalles de un agendamiento
+class AgendamientoDetailView(DetailView):
+    model = Agendamiento
+    template_name = 'agendamiento_detail.html'
+    context_object_name = 'agendamiento'
