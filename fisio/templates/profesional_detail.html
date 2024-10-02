@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Profesional</title>
+</head>
+<body>
+    <h1>{{ object.nombre }} {{ object.apellidos }}</h1>
+    <p>Fecha de Nacimiento: {{ object.fecha_nacimiento|date:"d/m/Y" }}</p>
+    <p>Celular: {{ object.celular }}</p>
+    <p>Correo: {{ object.correo }}</p>
+    <p>Sexo: {{ object.sexo }}</p>
+    <p>Tipo Profesional: {{ object.tipo_profesional }}</p>
+    <p>Activo: {{ object.activo }}</p>
+    <a href="{% url 'profesional_update' object.pk %}">Editar</a>
+    <a href="{% url 'profesional_delete' object.pk %}">Eliminar</a>
+    <a href="{% url 'profesional_list' %}">Volver a la lista</a>
+</body>
+</html>

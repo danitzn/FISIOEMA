@@ -1,0 +1,47 @@
+{% load static %}
+
+<h2>Lista de Pacientes</h2>
+
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+<a href="{% url 'paciente_create' %}">
+    <button class="btn btn-custom">Nuevo Paciente</button>
+</a>
+
+<table class="table table-striped">
+    
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Fecha de Nacimiento</th>
+            <th>Celular</th>
+            <th>Sexo</th>
+            <th>Diagnóstico Médico</th>
+            <th>Médico Tratante</th>
+            <th>Dirección</th>
+            <th>Fecha de Registro</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for paciente in pacientes %}
+        <tr>
+            <td>{{ paciente.nombre }}</td>
+            <td>{{ paciente.apellido }}</td>
+            <td>{{ paciente.fecha_nacimiento }}</td>
+            <td>{{ paciente.celular }}</td>
+            <td>{{ paciente.get_sexo_display }}</td> <!-- Esto te muestra la opción textual de 'Masculino' o 'Femenino' -->
+            <td>{{ paciente.diagnostico_medico }}</td>
+            <td>{{ paciente.medico_tratante }}</td>
+            <td>{{ paciente.direccion }}</td>
+            <td>{{ paciente.fecha_registro }}</td>
+            <td>
+                <a href="{% url 'paciente_detail' paciente.id %}" class="btn btn-info">Ver</a>
+                <a href="{% url 'paciente_update' paciente.id %}" class="btn btn-warning">Editar</a>
+                <a href="{% url 'paciente_delete' paciente.id %}" class="btn btn-danger">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
