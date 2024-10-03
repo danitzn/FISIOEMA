@@ -35,7 +35,7 @@ urlpatterns = [
 
 
     # Usuario URLs
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path('registro/', registro, name='registro'),
     # path('login/', login_view, name='login'),
     path('dashboard/', dashboard_view, name='dashboard'),

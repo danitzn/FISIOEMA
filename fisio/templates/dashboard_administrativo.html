@@ -1,33 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     {% load static %}
-    {% csrf_token %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Paciente - FISIOEMA</title>
+    
+    <!-- Cargar Bootstrap para un diseño moderno -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Cargar CSS propio -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Dashboard Administrativo</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    
+    <style>
+        body {
+            background-color: #e0d7f5; /* Lila suave */
+        }
+
+        /* Colores personalizados */
+        .bg-custom-dark {
+            background-color: #333;
+        }
+
+        .bg-custom-lila {
+            background-color: #6A5ACD; /* Lila */
+        }
+
+        .text-white {
+            color: #ffffff !important;
+        }
+
+        /* Barra lateral */
+        .sidebar {
+            height: 100vh;
+            background-color: #333;
+            padding-top: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #6A5ACD;
+        }
+
+        .sidebar ul li a .icon {
+            margin-right: 10px;
+        }
+
+        /* Encabezado */
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: right;
+        }
+
+        .header .username {
+            font-weight: bold;
+        }
+
+        /* Tabla */
+        .table-container {
+            padding: 20px;
+        }
+
+        .table th, .table td {
+            text-align: center;
+        }
+
+        .table thead {
+            background-color: #6A5ACD;
+            color: white;
+        }
+
+        .table tbody tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #e0d7f5;
+        }
+
+        /* Botones */
+        .btn-custom {
+            background-color: #6A5ACD;
+            color: white;
+        }
+
+        .btn-custom:hover {
+            background-color: #5a4fcf;
+        }
+
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to the Admin Dashboard</h1>
+
+    <!-- Encabezado -->
+    <header class="header">
+        <span class="username">Zulema Cárdenas, admin</span> - viernes, 28/06/2024
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Users</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Logout</a></li>
-        </ul>
-    </nav>
-    
-    <main>
-        <h2>Dashboard Content</h2>
-        <p>This is the main content area of the dashboard.</p>
-    </main>
-    
-    <footer>
-        <p>&copy; 2022 Your Company. All rights reserved.</p>
-    </footer>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Barra lateral -->
+            <nav class="col-md-2 sidebar">
+                <ul>
+                    <ul>
+                        <li><a href="{% url 'profesional_list' %}"><span class="icon">👤</span> Profesionales</a></li>
+                        <li><a href="{% url 'paciente_list' %}"><span class="icon">👥</span> Pacientes</a></li>
+                        <li><a href="#"><span class="icon">💵</span> Tarifas</a></li>
+                        <li><a href="#"><span class="icon">🗓️</span> Agenda Completa</a></li>
+                        <li><a href="#"><span class="icon">📈</span> Flujo de Caja</a></li>
+                        <li><a href="#"><span class="icon">🔐</span> Permisos y Roles</a></li>
+                        <li><a href="#"><span class="icon">⚙️</span> Configuración</a></li>
+                    </ul>
+                </ul>
+            </nav>
+
+            <!-- Contenido principal -->
+            <main class="col-md-10">
+                <div class="table-container">
+                    <h2 class="text-center">Lista de Profesionales</h2>
+
+                    <!-- Botones de acción -->
+                    <div class="mb-3">
+                        <a href="{% url 'profesional_create' %}">
+                            <button class="btn btn-custom">Nuevo Profesional</button>
+                        </a>
+                        <a href="#">
+                            <button class="btn btn-outline-secondary">Agenda Completa</button>
+                        </a>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" placeholder="Profesional">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control">
+                                <option>Área</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control">
+                                <option>Día de Asistencia</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control">
+                                <option>Turno</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Profesional</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Área</th>
+                                <th>Días de Asistencia</th>
+                                <th>Turno</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Zulema Cárdenas</td>
+                                <td>123456789</td>
+                                <td>zulema@example.com</td>
+                                <td>Fisioterapeuta</td>
+                                <td>Lunes, Miércoles y Viernes</td>
+                                <td>Mañana y Tarde</td>
+                                <td><button class="btn btn-success">Activo</button></td>
+                            </tr>
+                            <tr>
+                                <td>Patty Cárdenas</td>
+                                <td>987654321</td>
+                                <td>patty@example.com</td>
+                                <td>Psicóloga</td>
+                                <td>Martes</td>
+                                <td>Mañana</td>
+                                <td><button class="btn btn-success">Activo</button></td>
+                            </tr>
+                            <!-- Más filas aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Cargar Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
