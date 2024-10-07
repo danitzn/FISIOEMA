@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from datetime import date
+
+
 
 class Direccion(models.Model):
     domicilio = models.CharField(max_length=100)
@@ -9,7 +13,21 @@ class Direccion(models.Model):
     def __str__(self):
         return f"{self.domicilio}, {self.ciudad}, {self.estado}"
 
+
+
+class Responsable(models.Model):
+    nrodocumento = models.CharField(max_length=20, unique=True)
+    nombre = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
+    celular = models.CharField(max_length=20)
+    mail = models.EmailField()
+    fecha_registro = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}"
+    
 class Paciente(models.Model):
+    nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     fecha_nacimiento = models.DateField()
@@ -19,19 +37,38 @@ class Paciente(models.Model):
     medico_tratante = models.CharField(max_length=100)
     direccion = models.CharField(max_length=255)
     fecha_registro = models.DateField(auto_now_add=True)
+    mail = models.EmailField(unique=True)  # Asegúrate de que sea único en la base de datos
+    responsable = models.ForeignKey('Responsable', on_delete=models.CASCADE, related_name='pacientes', null=True, blank=True)
+
+    @property
+    def edad(self):
+        """Calcula la edad del paciente en función de su fecha de nacimiento."""
+        today = date.today()
+        return today.year - self.fecha_nacimiento.year - (
+            (today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+        )
+
+    def es_mayor_de_edad(self):
+        """Devuelve True si el paciente es mayor de edad, False si no lo es."""
+        return self.edad >= 18
+
+    def clean(self):
+        """Realiza las validaciones del modelo antes de guardar."""
+        # Verifica que los pacientes menores de edad tengan un responsable
+        if not self.es_mayor_de_edad() and not self.responsable:
+            raise ValidationError("Los pacientes menores de edad deben tener un responsable.")
+        
+        # Verifica si el número de documento ya está registrado
+        if Paciente.objects.filter(nrodocumento=self.nrodocumento).exclude(pk=self.pk).exists():
+            raise ValidationError('El número de documento ya está registrado.')
+
+        # Verifica si el correo electrónico ya está registrado
+        if Paciente.objects.filter(mail=self.mail).exclude(pk=self.pk).exists():
+            raise ValidationError('El correo electrónico ya está registrado.')
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
-
-class Responsable(models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
-    celular = models.CharField(max_length=20)
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='responsables')
-
-    def __str__(self):
-        return f"{self.nombre} {self.apellido}"
-
+    
 class Servicio(models.Model):
     nombre = models.CharField(max_length=50)
 
@@ -41,6 +78,7 @@ class Servicio(models.Model):
 
 #datos del profesional
 class Profesional(models.Model):
+    nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
     fecha_nacimiento = models.DateField()
@@ -278,3 +316,9 @@ class Perfil(models.Model):
         return f'{self.user.username} - {self.get_tipo_display()}'
 
 
+class Area(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField()
+
+    def __str__(self):
+        return self.nombre

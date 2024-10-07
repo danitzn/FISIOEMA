@@ -2,12 +2,72 @@
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Agendamiento, Paciente, Profesional
+from .models import Agendamiento, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.views.decorators.csrf import requires_csrf_token
+
+
+
+#areas y servicios
+class AreaListView(ListView):
+    model = Area
+    template_name = 'area_list.html'
+    context_object_name = 'areas'
+
+class AreaDetailView(DetailView):
+    model = Area
+    template_name = 'area_detail.html'
+    context_object_name = 'area'
+
+class AreaCreateView(CreateView):
+    model = Area
+    fields = '__all__'
+    template_name = 'area_form.html'
+    success_url = reverse_lazy('area_list')
+
+class AreaUpdateView(UpdateView):
+    model = Area
+    fields = '__all__'
+    template_name = 'area_form.html'
+    success_url = reverse_lazy('area_list')
+
+class AreaDeleteView(DeleteView):
+    model = Area
+    template_name = 'area_confirm_delete.html'
+    success_url = reverse_lazy('area_list')
+
+class ServicioListView(ListView):
+    model = Servicio
+    template_name = 'servicio_list.html'
+    context_object_name = 'servicios'
+
+class ServicioDetailView(DetailView):
+    model = Servicio
+    template_name = 'servicio_detail.html'
+    context_object_name = 'servicio'
+
+class ServicioCreateView(CreateView):
+    model = Servicio
+    fields = '__all__'
+    template_name = 'servicio_form.html'
+    success_url = reverse_lazy('servicio_list')
+
+class ServicioUpdateView(UpdateView):
+    model = Servicio
+    fields = '__all__'
+    template_name = 'servicio_form.html'
+    success_url = reverse_lazy('servicio_list')
+
+class ServicioDeleteView(DeleteView):
+    model = Servicio
+    template_name = 'servicio_confirm_delete.html'
+    success_url = reverse_lazy('servicio_list')
+
+
 
 # Paciente Views
 class PacienteListView(ListView):
@@ -82,6 +142,7 @@ def registro(request):
     
     return render(request, 'registro.html', {'form': form})
 
+@requires_csrf_token
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']

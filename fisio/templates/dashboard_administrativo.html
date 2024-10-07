@@ -112,7 +112,7 @@
 
     <!-- Encabezado -->
     <header class="header">
-        <span class="username">Zulema Cárdenas, admin</span> - viernes, 28/06/2024
+        <span class="username">{{ user.get_full_name|default:user.username }}</span> - {% now "l, d/m/Y" %}
     </header>
 
     <div class="container-fluid">
@@ -124,10 +124,11 @@
                         <li><a href="{% url 'profesional_list' %}"><span class="icon">👤</span> Profesionales</a></li>
                         <li><a href="{% url 'paciente_list' %}"><span class="icon">👥</span> Pacientes</a></li>
                         <li><a href="#"><span class="icon">💵</span> Tarifas</a></li>
-                        <li><a href="#"><span class="icon">🗓️</span> Agenda Completa</a></li>
+                        <li><a href="#"><span class="icon">🗓️</span> Agendamientos</a></li>
+                        <li><a href = "{% url 'area_list' %}"class = "icon">🗺️ <span>  Areas</span></a></li>
                         <li><a href="#"><span class="icon">📈</span> Flujo de Caja</a></li>
-                        <li><a href="#"><span class="icon">🔐</span> Permisos y Roles</a></li>
-                        <li><a href="#"><span class="icon">⚙️</span> Configuración</a></li>
+                        <li><a href="/admin/"><span class="icon">🔐</span> Permisos y Roles</a></li>
+                        <li><a href="/admin/"><span class="icon">⚙️</span> Configuración</a></li>
                     </ul>
                 </ul>
             </nav>
@@ -142,8 +143,8 @@
                         <a href="{% url 'profesional_create' %}">
                             <button class="btn btn-custom">Nuevo Profesional</button>
                         </a>
-                        <a href="#">
-                            <button class="btn btn-outline-secondary">Agenda Completa</button>
+                        <a href="{% url 'agendamiento_create' %}">
+                            <button class="btn btn-outline-secondary">Crear Agendamiento</button>
                         </a>
                     </div>
 
@@ -184,7 +185,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Zulema Cárdenas</td>
+                                <td></td>
                                 <td>123456789</td>
                                 <td>zulema@example.com</td>
                                 <td>Fisioterapeuta</td>

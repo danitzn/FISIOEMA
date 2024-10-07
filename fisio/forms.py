@@ -1,16 +1,19 @@
 # forms.py
 from django import forms
-from .models import Agendamiento, Paciente, Profesional
+from .models import Agendamiento, Area, Paciente, Profesional, Servicio
 from django.contrib.auth.models import User
 from .models import Perfil
 from django.core.validators import validate_email
 
+class AreaForm (forms.ModelForm):
+    class Meta:
+        model = Area
+        fields = '__all__'
 
-   # forms.py
-from django import forms
-from django.contrib.auth.models import User
-from .models import Perfil
-from django.core.validators import validate_email
+class ServicioForm (forms.ModelForm):
+    class Meta:
+        model = Servicio
+        fields = '__all__'
 
 class RegistroForm(forms.ModelForm):
     email = forms.EmailField(required=True, validators=[validate_email])

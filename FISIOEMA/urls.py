@@ -4,13 +4,29 @@ from django.urls import path
 # from . import views
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, ConfirmacionAgendamientoView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
-    ProfesionalUpdateView, ProfesionalDeleteView, dashboard_view, home,registro,login_view,
+    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, home,registro,login_view,
 )
 
 urlpatterns = [
+    #areas y servicios URLs
+    path('areas/', AreaListView.as_view(), name='area_list'),
+    path('areas/<int:pk>/', AreaDetailView.as_view(), name='area_detail'),
+    path('areas/nuevo/', AreaCreateView.as_view(), name='area_create'),
+    path('areas/<int:pk>/editar/', AreaUpdateView.as_view(), name='area_update'),
+    path('areas/<int:pk>/eliminar/', AreaDeleteView.as_view(), name='area_delete'),
+    path('servicios/', ServicioListView.as_view(), name='servicio_list'),
+    path('servicios/<int:pk>/', ServicioDetailView.as_view(), name='servicio_detail'),
+    path('servicios/nuevo/', ServicioCreateView.as_view(), name='servicio_create'),
+    path('servicios/<int:pk>/editar/', ServicioUpdateView.as_view(), name='servicio_update'),
+    path('servicios/<int:pk>/eliminar/', ServicioDeleteView.as_view(), name='servicio_delete'),
+
+    
+    
+
+
     # Paciente URLs
     path('pacientes/', PacienteListView.as_view(), name='paciente_list'),
     path('pacientes/<int:pk>/', PacienteDetailView.as_view(), name='paciente_detail'),
