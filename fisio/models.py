@@ -87,8 +87,8 @@ class Profesional(models.Model):
     fecha_registro = models.DateField(auto_now_add=True)
     sexo = models.CharField(max_length=10, choices=[('M', 'Masculino'), ('F', 'Femenino')])
     activo = models.BooleanField(default=True)
-    # responsable_area = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinados')
-    responsable_area = models.CharField(max_length=50)
+    responsable_area = models.ForeignKey('Area', on_delete=models.CASCADE, related_name='profesionales', null=True, blank=True)
+    
     
 
     def __str__(self):

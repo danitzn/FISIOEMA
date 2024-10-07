@@ -26,21 +26,21 @@ h1, h2, h3 {
     background-color: var(--blanco);
     border: 2px solid var(--lila-claro);
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
+    border-radius: 10px;
     padding: 20px;
     margin: 20px auto;
     max-width: 400px;
-    text-align: center;
+    text-align: right; /* Alinea el contenido a la derecha */
 }
 
 /* Estilos para botones */
 button {
     background-color: var(--lila-oscuro);
     color: var(--blanco);
-    padding: 8px 16px; /* Reducido para hacer el botón más pequeño */
+    padding: 8px 16px;
     border: none;
-    border-radius: 20px; /* Bordes menos invasivos */
-    font-size: 1em; /* Tamaño de texto reducido */
+    border-radius: 10px;
+    font-size: 1em;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s;
 }
@@ -48,17 +48,16 @@ button {
 button:hover {
     background-color: var(--lila-claro);
     color: var(--gris-oscuro);
-    transform: scale(1.05); /* Animación sutil en hover */
+    transform: scale(1.05);
 }
 
 /* Inputs personalizados */
 input {
     width: 100%;
-    padding: 10px 15px; /* Padding reducido */
+    padding: 10px 15px;
     margin: 8px 0;
-    display: inline-block;
     border: 1px solid var(--lila-oscuro);
-    border-radius: 20px; /* Bordes menos redondeados */
+    border-radius: 10px;
     box-sizing: border-box;
     transition: border-color 0.3s ease;
 }
@@ -72,7 +71,7 @@ input:focus {
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .error-message {
@@ -88,13 +87,5 @@ img {
 }
 
 img:hover {
-    transform: scale(1.1);
-}
-
-/* Footer y detalles adicionales */
-footer {
-    margin-top: 40px;
-    text-align: center;
-    color: var(--gris-oscuro);
-    font-size: 0.9em;
+    transform: scale(1.05);
 }
