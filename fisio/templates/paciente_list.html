@@ -1,9 +1,19 @@
-<h2>Lista de Pacientes</h2>
+{% extends 'base_administrativo.html' %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
-<a href="{% url 'paciente_create' %}">Nuevo Paciente</a>
-<ul>
-    {% for paciente in pacientes %}
-        <li><a href="{% url 'paciente_detail' paciente.id %}">{{ paciente.nombre }} {{ paciente.apellido }}</a></li>
-    {% endfor %}
-</ul>
+
+{% block content %}
+    <h2>Lista de Pacientes</h2>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <a href="{% url 'paciente_create' %}" class="btn btn-primary">Nuevo Paciente</a>
+
+    <ul>
+        {% for paciente in pacientes %}
+            <li>
+                <a href="{% url 'paciente_detail' paciente.id %}">
+                    {{ paciente.nombre }} {{ paciente.apellido }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

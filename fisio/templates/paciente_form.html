@@ -1,83 +1,104 @@
+{% extends 'base_administrativo.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulario de Paciente</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
-</head>
-</html>
+
+{% block content %}
 <h2 class="text-2xl font-semibold mb-4">Formulario de Paciente</h2>
 
-
-<form method="post" class="space-y-4 bg-white p-6 rounded-lg shadow-md">
+<form method="post" class="bg-white p-4 rounded-lg shadow-md">
     {% csrf_token %}
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <!-- Renderizando cada campo del formulario -->
-        <div>
-            <label class="block text-gray-700" for="id_nrodocumento">Nro. de Documento</label>
-            {{ form.nrodocumento }}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="id_nrodocumento" class="form-label">Nro. de Documento</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_nrodocumento" 
+                   placeholder="Nro. de Documento" 
+                   value="{{ form.nrodocumento.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_nombre">Nombre</label>
-            {{ form.nombre }}
+        <div class="col-md-6">
+            <label for="id_nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_nombre" 
+                   placeholder="Nombre" 
+                   value="{{ form.nombre.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_apellido">Apellido</label>
-            {{ form.apellido }}
+        <div class="col-md-6">
+            <label for="id_apellido" class="form-label">Apellido</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_apellido" 
+                   placeholder="Apellido" 
+                   value="{{ form.apellido.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_fecha_nacimiento">Fecha de Nacimiento</label>
-            {{ form.fecha_nacimiento }}
+        <div class="col-md-6">
+            <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+            <input type="date" class="form-control form-control-sm" 
+                   id="id_fecha_nacimiento" 
+                   value="{{ form.fecha_nacimiento.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_celular">Celular</label>
-            {{ form.celular }}
+        <div class="col-md-6">
+            <label for="id_celular" class="form-label">Celular</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_celular" 
+                   placeholder="Número de Celular" 
+                   value="{{ form.celular.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_sexo">Sexo</label>
+        <div class="col-md-6">
+            <label for="id_sexo" class="form-label">Sexo</label>
             {{ form.sexo }}
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_diagnostico_medico">Diagnóstico Médico</label>
-            {{ form.diagnostico_medico }}
+        <div class="col-md-6">
+            <label for="id_diagnostico_medico" class="form-label">Diagnóstico Médico</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_diagnostico_medico" 
+                   placeholder="Diagnóstico Médico" 
+                   value="{{ form.diagnostico_medico.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_medico_tratante">Médico Tratante</label>
-            {{ form.medico_tratante }}
+        <div class="col-md-6">
+            <label for="id_medico_tratante" class="form-label">Médico Tratante</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_medico_tratante" 
+                   placeholder="Médico Tratante" 
+                   value="{{ form.medico_tratante.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_direccion">Dirección</label>
-            {{ form.direccion }}
+        <div class="col-md-6">
+            <label for="id_direccion" class="form-label">Dirección</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_direccion" 
+                   placeholder="Dirección" 
+                   value="{{ form.direccion.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_mail">Correo Electrónico</label>
-            {{ form.mail }}
+        <div class="col-md-6">
+            <label for="id_mail" class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-control form-control-sm" 
+                   id="id_mail" 
+                   placeholder="Correo Electrónico" 
+                   value="{{ form.mail.value }}">
         </div>
-        <div>
-            <label class="block text-gray-700" for="id_responsable">Responsable (si es menor de edad)</label>
-            {{ form.responsable }}
+        <div class="col-md-6">
+            <label for="id_responsable" class="form-label">Responsable (si es menor de edad)</label>
+            <input type="text" class="form-control form-control-sm" 
+                   id="id_responsable" 
+                   placeholder="Responsable" 
+                   value="{{ form.responsable.value }}">
         </div>
     </div>
+
+    <!-- Mostrar errores del formulario si los hay -->
     {% if form.errors %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        <strong class="font-bold">Errores en el formulario:</strong>
-        <ul>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li>{{ field }}: {{ error }}</li>
+        <div class="alert alert-danger mt-4">
+            <strong>Errores en el formulario:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
+            </ul>
+        </div>
+    {% endif %}
 
-
-    <div class="flex items-center space-x-4">
-        <button type="submit" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 focus:outline-none">
-            Guardar
-            
-        </button>
-        <a href="{% url 'paciente_list' %}" class="text-gray-600 hover:text-purple-600">Cancelar</a>
+    <div class="mt-4 d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'paciente_list' %}" class="btn btn-secondary">Cancelar</a>
     </div>
 </form>
+{% endblock %}

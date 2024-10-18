@@ -2,36 +2,114 @@
 <html lang="es">
 <head>
     {% load static %}
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>FISIOEMA - Ingreso</title>
+
+    <!-- Cargar Bootstrap para diseño -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Cargar CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        body {
+            background-color: #e0d7f5; /* Lila suave */
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        /* Tarjeta del formulario */
+        .form-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .form-card h1 {
+            color: #6A5ACD; /* Lila oscuro */
+        }
+
+        .form-card input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .form-card .btn-primary {
+            background-color: #6A5ACD;
+            border: none;
+        }
+
+        .form-card .btn-primary:hover {
+            background-color: #5a4fcf;
+        }
+
+        .form-card .btn-secondary {
+            background-color: #ddd;
+            border: none;
+            color: #333;
+        }
+
+        .form-card .btn-secondary:hover {
+            background-color: #ccc;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body class="bg-lila-light flex items-center justify-center h-screen">
-    <div class="w-full max-w-sm mx-auto p-8 bg-white shadow-lg rounded-lg">
-        <div class="text-center">
-            <!-- <img src="{% static 'images/logo_fisioema.png' %}" alt="Logo FISIOEMA" class="h-20 mx-auto"> -->
-            <h1 class="text-2xl font-semibold text-gray-700 mt-4">Bienvenido a FISIOEMA</h1>
+<body>
+    <div class="main-container">
+        <div class="form-card">
+            <div class="text-center mb-4">
+                <h1 class="h4">Bienvenido a FISIOEMA</h1>
+                <!-- Logo opcional -->
+                <!-- <img src="{% static 'images/logo_fisioema.png' %}" alt="Logo" class="h-16 mx-auto mb-3"> -->
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {% if error_message %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Ingrese su usuario" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese su contraseña" required>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember">
+                        <label class="form-check-label" for="remember">Recordarme</label>
+                    </div>
+                    <a href="#" class="text-muted">¿Olvidó su contraseña?</a>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Ingresar</button>
+                <a href="{% url 'registro' %}" class="btn btn-secondary w-100">Registro</a>
+            </form>
         </div>
-        <form method="post" class="mt-6">
-            {% csrf_token %}
-            {% if error_message %}
-                <p class="text-red-500">{{ error_message }}</p>
-            {% endif %}
-            <div class="mb-4">
-                <input type="text" name="username" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Usuario" required>
-            </div>
-            <div class="mb-6">
-                <input type="password" name="password" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Contraseña" required>
-            </div>
-            <div>
-                <button type="submit" class="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700">Ingresar</button>
-                <a href="{% url 'registro' %}">
-                    <button type="button" class="w-full bg-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-400 mt-2">Registro</button>
-                </a>
-            </div>
-        </form>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
