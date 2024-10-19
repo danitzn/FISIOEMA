@@ -4,7 +4,7 @@ from django.urls import path
 # from . import views
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
     ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, home,registro,login_view,
@@ -24,7 +24,12 @@ urlpatterns = [
     path('servicios/<int:pk>/eliminar/', ServicioDeleteView.as_view(), name='servicio_delete'),
 
     
-    
+    #horarios de atencion
+    path('horarios/', HorarioAtencionListView.as_view(), name='horario_list'),
+    path('horarios/<int:pk>/', HorarioAtencionListView.as_view(), name='horario_detail'),
+    path('horarios/nuevo/', HorarioAtencionCreateView.as_view(), name='horario_create'),
+    path('horarios/<int:pk>/editar/', HorarioAtencionUpdateView.as_view(), name='horario_update'),
+    path('horarios/<int:pk>/eliminar/', HorarioAtencionDeleteView.as_view(), name='horario_delete'),    
 
 
     # Paciente URLs

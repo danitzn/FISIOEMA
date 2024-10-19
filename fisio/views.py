@@ -2,7 +2,7 @@
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Agendamiento, Paciente, Profesional, Servicio, Area
+from .models import Agendamiento, HorarioAtencion, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate
 from .forms import RegistroForm
@@ -236,3 +236,29 @@ class AgendamientoDetailView(DetailView):
     model = Agendamiento
     template_name = 'agendamiento_detail.html'
     context_object_name = 'agendamiento'
+
+class HorarioAtencionView(TemplateView):
+    template_name = 'horario_atencion.html'
+
+class HorarioAtencionCreateView(CreateView):
+    model = HorarioAtencion
+    fields = '__all__'
+    template_name = 'horario_atencion_form.html'
+    success_url = reverse_lazy('horario_atencion_list')
+
+class HorarioAtencionUpdateView(UpdateView):
+    model = HorarioAtencion
+    fields = '__all__'
+    template_name = 'horario_atencion_form.html'
+    success_url = reverse_lazy('horario_atencion_list')
+
+class HorarioAtencionDeleteView(DeleteView):
+    model = HorarioAtencion
+    template_name = 'horario_atencion_confirm_delete.html'
+    success_url = reverse_lazy('horario_atencion_list')
+
+class HorarioAtencionListView(ListView):
+    model = HorarioAtencion
+    template_name = 'horario_atencion_list.html'
+    context_object_name = 'horarios_atencion'
+    

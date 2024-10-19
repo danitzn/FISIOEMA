@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from datetime import date
+from datetime import date, time
 
 
 
@@ -93,16 +93,57 @@ class Profesional(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellidos}"
+    
+
 #datos del horario de atencion de los profesionales
+
 class HorarioAtencion(models.Model):
+    TURNOS_CHOICES = [
+        ('M', 'Mañana (07:00 - 10:00)'),
+        ('S', 'Siesta (10:00 - 13:00)'),
+        ('T', 'Tarde (14:00 - 18:00)'),
+    ]
+
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE, related_name='horarios_atencion')
-    dia = models.CharField(max_length=20)
+    dia = models.DateField()  # Cambiamos a DateField para incluir fechas
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
+    idturno = models.CharField(max_length=1, choices=TURNOS_CHOICES, blank=True)
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='horarios_atencion')
 
     def __str__(self):
-        return f"{self.dia} ({self.hora_inicio}-{self.hora_fin})"
-    
+        return f"{self.dia} ({self.hora_inicio} - {self.hora_fin}) - {self.servicio}"
+
+    def save(self, *args, **kwargs):
+        """ Sobreescribe el método save para realizar las validaciones antes de guardar """
+        self.asigna_turno()  # Llamamos al método antes de guardar
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """ Método clean para validaciones personalizadas """
+        # 1. Validar que la hora de inicio sea menor que la hora de fin
+        if self.hora_inicio >= self.hora_fin:
+            raise ValueError("La hora de inicio debe ser menor que la hora de fin.")
+        
+        # 2. Validar que la fecha no sea menor a hoy
+        if self.dia < date.today():
+            raise ValueError("La fecha no puede ser menor que la fecha de hoy.")
+        
+        # 3. Validar que el día no sea domingo
+        if self.dia.weekday() == 6:  # 6 representa el domingo en Python
+            raise ValueError("No se pueden agendar turnos los días domingo.")
+
+    def asigna_turno(self):
+        """ Asigna el turno basado en la hora de inicio y fin """
+        if time(7, 0) <= self.hora_inicio < time(10, 0) and self.hora_fin <= time(10, 0):
+            self.idturno = 'M'  # Mañana
+        elif time(10, 0) <= self.hora_inicio < time(13, 0) and self.hora_fin <= time(13, 0):
+            self.idturno = 'S'  # Siesta
+        elif time(14, 0) <= self.hora_inicio < time(18, 0) and self.hora_fin <= time(18, 0):
+            self.idturno = 'T'  # Tarde
+        else:
+            raise ValueError("El horario debe estar entre las 07:00 y las 18:00 horas.")
+        
 
 
 class Agendamiento(models.Model):
@@ -313,7 +354,8 @@ class Perfil(models.Model):
     nro_documento = models.CharField(max_length=20, unique=True)
     
     def __str__(self):
-        return f'{self.user.username} - {self.get_tipo_display()}'
+        return f'{self.user.username}' 
+        # - {self.get_tipo_display()}'
 
 
 class Area(models.Model):
@@ -322,3 +364,5 @@ class Area(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
