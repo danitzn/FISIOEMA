@@ -64,19 +64,26 @@ class RegistroForm(forms.ModelForm):
             raise forms.ValidationError('El correo ya está registrado.')
         return email
 
+
+
 class PacienteForm(forms.ModelForm):
-    fecha_nacimiento = forms.DateField(
-        widget=forms.DateInput(format='%d/%m/%Y'),
-        input_formats=['%d/%m/%Y']
-    )
-    
     class Meta:
         model = Paciente
         fields = '__all__'
         widgets = {
             'direccion': forms.TextInput(attrs={'class': 'block w-full px-4 py-2 border rounded-lg'}),
-            'fecha_nacimiento': forms.DateInput(attrs={'class': 'block w-full px-4 py-2 border rounded-lg', 'placeholder': 'dd/mm/aaaa'}),
+            'fecha_nacimiento': forms.DateInput(
+                attrs={
+                    'class': 'block w-full px-4 py-2 border rounded-lg',
+                    'placeholder': 'dd/mm/aaaa',
+                },
+                format='%d/%m/%Y'  # Corrige el formato aquí
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(PacienteForm, self).__init__(*args, **kwargs)
+        self.fields['fecha_nacimiento'].input_formats = ['%d/%m/%Y']  # Formato aceptado al ingresar la fecha
 
 
 class AgendamientoForm(forms.ModelForm):

@@ -9,37 +9,23 @@
     <div class="row g-3">
         <div class="col-md-6">
             <label for="id_nrodocumento" class="form-label">Nro. de Documento</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_nrodocumento" 
-                   placeholder="Nro. de Documento" 
-                   value="{{ form.nrodocumento.value }}">
+            {{ form.nrodocumento }}
         </div>
         <div class="col-md-6">
             <label for="id_nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_nombre" 
-                   placeholder="Nombre" 
-                   value="{{ form.nombre.value }}">
+            {{ form.nombre }}
         </div>
         <div class="col-md-6">
             <label for="id_apellido" class="form-label">Apellido</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_apellido" 
-                   placeholder="Apellido" 
-                   value="{{ form.apellido.value }}">
+            {{ form.apellido }}
         </div>
         <div class="col-md-6">
             <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-            <input type="date" class="form-control form-control-sm" 
-                   id="id_fecha_nacimiento" 
-                   value="{{ form.fecha_nacimiento.value }}">
+            {{ form.fecha_nacimiento }}
         </div>
         <div class="col-md-6">
             <label for="id_celular" class="form-label">Celular</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_celular" 
-                   placeholder="Número de Celular" 
-                   value="{{ form.celular.value }}">
+            {{ form.celular }}
         </div>
         <div class="col-md-6">
             <label for="id_sexo" class="form-label">Sexo</label>
@@ -47,38 +33,23 @@
         </div>
         <div class="col-md-6">
             <label for="id_diagnostico_medico" class="form-label">Diagnóstico Médico</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_diagnostico_medico" 
-                   placeholder="Diagnóstico Médico" 
-                   value="{{ form.diagnostico_medico.value }}">
+            {{ form.diagnostico_medico }}
         </div>
         <div class="col-md-6">
             <label for="id_medico_tratante" class="form-label">Médico Tratante</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_medico_tratante" 
-                   placeholder="Médico Tratante" 
-                   value="{{ form.medico_tratante.value }}">
+            {{ form.medico_tratante }}
         </div>
         <div class="col-md-6">
             <label for="id_direccion" class="form-label">Dirección</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_direccion" 
-                   placeholder="Dirección" 
-                   value="{{ form.direccion.value }}">
+            {{ form.direccion }}
         </div>
         <div class="col-md-6">
             <label for="id_mail" class="form-label">Correo Electrónico</label>
-            <input type="email" class="form-control form-control-sm" 
-                   id="id_mail" 
-                   placeholder="Correo Electrónico" 
-                   value="{{ form.mail.value }}">
+            {{ form.mail }}
         </div>
         <div class="col-md-6">
             <label for="id_responsable" class="form-label">Responsable (si es menor de edad)</label>
-            <input type="text" class="form-control form-control-sm" 
-                   id="id_responsable" 
-                   placeholder="Responsable" 
-                   value="{{ form.responsable.value }}">
+            {{ form.responsable }}
         </div>
     </div>
 

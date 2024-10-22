@@ -5,15 +5,33 @@
     <h2>Lista de Pacientes</h2>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     
-    <a href="{% url 'paciente_create' %}" class="btn btn-primary">Nuevo Paciente</a>
+    <a href="{% url 'paciente_create' %}" class="btn btn-primary mb-3">Nuevo Paciente</a>
 
-    <ul>
-        {% for paciente in pacientes %}
-            <li>
-                <a href="{% url 'paciente_detail' paciente.id %}">
-                    {{ paciente.nombre }} {{ paciente.apellido }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Fecha de Nacimiento</th>
+            <th scope="col">Número de Documento</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for paciente in pacientes %}
+                <tr>
+                  <td>{{ paciente.nombre }}</td>
+                  <td>{{ paciente.apellido }}</td>
+                  <td>{{ paciente.fecha_nacimiento|date:"d/m/Y" }}</td>
+                  <td>{{ paciente.nrodocumento }}</td>
+                  <td>
+                    <a href="{% url 'paciente_detail' paciente.pk %}" class="btn btn-info">Ver</a>
+                    <a href="{% url 'paciente_update' paciente.pk %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'paciente_delete' paciente.pk %}" class="btn btn-danger">Eliminar</a>
+                  </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 {% endblock %}
