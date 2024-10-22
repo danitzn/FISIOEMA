@@ -26,10 +26,21 @@
     </style>
 </head>
 <body>
-    <!-- Encabezado -->
-    <header class="header bg-dark text-white text-end p-2">
-        <span class="username">{{ user.get_full_name|default:user.username }}</span> - {% now "l, d/m/Y" %}
-    </header>
+    {% load static %}
+<!-- Encabezado -->
+<header class="header bg-dark text-white p-2 d-flex justify-content-between align-items-center">
+    <!-- Logo a la izquierda -->
+    <div class="logo">
+        <a href="{% url 'home' %}">
+            <img src="{% static 'images/logofisio.png' %}" alt="Logo" class="img-fluid" style="max-height: 50px; max-width: 150px;">
+        </a>
+    </div>
+    <!-- Nombre de usuario y fecha a la derecha -->
+    <div class="text-end">
+        <span class="username">{{ user.get_full_name|default:user.username }}</span> - 
+        {% now "l, d/m/Y" %}
+    </div>
+</header>
 
     <div class="container-fluid">
         <div class="row">
@@ -39,7 +50,7 @@
                     <li><a href="{% url 'profesional_list' %}">👤 Profesionales</a></li>
                     <li><a href="{% url 'paciente_list' %}">👥 Pacientes</a></li>
                     <li><a href="#">💵 Tarifas</a></li>
-                    <li><a href="{% url 'horarioatencion_list' %}">🕒 Horarios de Atención</a></li>
+                    <li><a href="{% url 'horario_list' %}">🕒 Horarios de Atención</a></li>
                     <li><a href="#">🗓️ Agendamientos</a></li>
                     <li><a href="{% url 'area_list' %}">🗺️ Áreas</a></li>
                     <li><a href="#">📈 Flujo de Caja</a></li>
