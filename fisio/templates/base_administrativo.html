@@ -47,15 +47,16 @@
             <!-- Barra lateral -->
             <nav class="col-md-2 sidebar">
                 <ul>
-                    <li><a href="{% url 'profesional_list' %}">👤 Profesionales</a></li>
-                    <li><a href="{% url 'paciente_list' %}">👥 Pacientes</a></li>
-                    <li><a href="#">💵 Tarifas</a></li>
-                    <li><a href="{% url 'horario_list' %}">🕒 Horarios de Atención</a></li>
-                    <li><a href="#">🗓️ Agendamientos</a></li>
-                    <li><a href="{% url 'area_list' %}">🗺️ Áreas</a></li>
-                    <li><a href="#">📈 Flujo de Caja</a></li>
-                    <li><a href="/admin/">🔐 Permisos y Roles</a></li>
-                    <li><a href="/admin/">⚙️ Configuración</a></li>
+                    <li><a href="{% url 'profesional_list' %}">    <span class="icon">👤</span> Profesionales</a></li>
+                    <li><a href="{% url 'paciente_list' %}">       <span class="icon">👥</span> Pacientes</a></li>
+                    <li><a href="#"><span class="icon">💵          </span> Tarifas</a></li>
+                    <li><a href="{% url 'agendamiento_create' %}"> <span class="icon">🗓️          </span> Agendamientos</a></li>
+                    <!-- <li><a href="#"><span class="icon">📋          </span> Historias Clínicas</a></li> -->
+                    <li><a href="{% url 'horario_list'%}">          <span class="icon">📅          </span> Horario de atención</a></li>
+                    <li><a href = "{% url 'area_list' %}">          <span class = "icon">🗺️  </span>  Areas</a></li>
+                    <li><a href="#"><span class="icon">📈          </span> Flujo de Caja</a></li>
+                    <li><a href="/admin/"><span class="icon">🔐    </span> Permisos y Roles</a></li>
+                    <li><a href="/admin/"><span class="icon">⚙️    </span> Configuración</a></li>
                 </ul>
             </nav>
 

@@ -121,13 +121,14 @@
             <nav class="col-md-2 sidebar">
                 <ul>
                     <ul>
-                        <li><a href="{% url 'profesional_list' %}"><span class="icon">👤</span> Profesionales</a></li>
-                        <li><a href="{% url 'paciente_list' %}"><span class="icon">👥</span> Pacientes</a></li>
-                        <li><a href="#"><span class="icon">💵</span> Tarifas</a></li>
-                        <li><a href="#"><span class="icon">🗓️</span> Agendamientos</a></li>
-                        <li><a href="#"><span class="icon">📈</span> Flujo de Caja</a></li>
-                        <li><a href="/admin/"><span class="icon">🔐</span> Permisos y Roles</a></li>
-                        <li><a href="/admin/"><span class="icon">⚙️</span> Configuración</a></li>
+                        <li><a href="{% url 'profesional_list' %}">    <span class="icon">👤</span> Profesionales</a></li>
+                        <li><a href="{% url 'paciente_list' %}">       <span class="icon">👥</span> Pacientes</a></li>
+                        <li><a href="#"><span class="icon">💵          </span> Tarifas</a></li>
+                        <li><a href="{% url 'agendamiento_create' %}"> <span class="icon">🗓️          </span> Agendamientos</a></li>
+                        <li><a href = "{% url 'area_list' %}">    <span class = "icon">🗺️  </span>  Areas</a></li>
+                        <li><a href="#"><span class="icon">📈          </span> Flujo de Caja</a></li>
+                        <li><a href="/admin/"><span class="icon">🔐    </span> Permisos y Roles</a></li>
+                        <li><a href="/admin/"><span class="icon">⚙️    </span> Configuración</a></li>
                     </ul>
                 </ul>
             </nav>

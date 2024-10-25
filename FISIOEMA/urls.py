@@ -29,7 +29,7 @@ urlpatterns = [
     path('horarios/<int:pk>/', HorarioAtencionListView.as_view(), name='horario_detail'),
     path('horarios/nuevo/', HorarioAtencionCreateView.as_view(), name='horario_create'),
     path('horarios/<int:pk>/editar/', HorarioAtencionUpdateView.as_view(), name='horario_update'),
-    path('horarios/<int:pk>/eliminar/', HorarioAtencionDeleteView.as_view(), name='horario_delete'),    
+    path('horarios/<int:pk>/eliminar/', HorarioAtencionDeleteView.as_view(), name='horario_delete'),
 
 
     # Paciente URLs

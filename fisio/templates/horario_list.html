@@ -1,0 +1,54 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block title %}Horarios de Atención{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Horarios de Atención - Turnos</h1>
+
+    <a href="{% url 'horario_create' %}" class="btn btn-success mb-3">Crear Nuevo Horario</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Profesional</th>
+                <th>Servicio</th>
+                <th>Día</th>
+                <th>Hora Inicio</th>
+                <th>Hora Fin</th>
+                <th>Turno</th>
+                <th>Acciones</th> <!-- Añadimos esta columna para los botones de acción -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for horario in object_list %}
+            <tr>
+                <td>{{ horario.profesional }}</td>
+                <td>{{ horario.servicio }}</td>
+                <td>{{ horario.dia }}</td>
+                <td>{{ horario.hora_inicio }}</td>
+                <td>{{ horario.hora_fin }}</td>
+                <td>{{ horario.get_idturno_display }}</td>
+                <td>
+                    <!-- Botones de acción para visualizar, editar y eliminar -->
+                    <a href="{% url 'horario_detail' horario.pk %}" class="btn btn-info btn-sm">Visualizar</a>
+                    <a href="{% url 'horario_update' horario.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'horario_delete' horario.pk %}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Estás seguro de que deseas eliminar este horario?');">
+                       Eliminar
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No hay horarios disponibles.</td> <!-- Ajustamos colspan a 7 por la nueva columna -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Bootstrap 5 Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

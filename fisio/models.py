@@ -132,6 +132,7 @@ class HorarioAtencion(models.Model):
         # 3. Validar que el día no sea domingo
         if self.dia.weekday() == 6:  # 6 representa el domingo en Python
             raise ValueError("No se pueden agendar turnos los días domingo.")
+        
 
     def asigna_turno(self):
         """ Asigna el turno basado en la hora de inicio y fin """
@@ -167,6 +168,18 @@ class Agendamiento(models.Model):
 
     def __str__(self):
         return f"{self.fecha} {self.hora} - {self.paciente} ({self.estado})"
+    
+    def clean(self):
+        # Validar si ya existe un agendamiento en el mismo horario para el mismo profesional y servicio.
+        if Agendamiento.objects.filter(
+                profesional=self.profesional,
+                servicio=self.servicio,
+                fecha=self.fecha,
+                hora=self.hora).exists():
+            raise ValidationError("Este turno ya está reservado para este profesional.")
+
+    def __str__(self):
+        return f"{self.profesional} - {self.servicio} ({self.fecha} a las {self.hora})"
 
 
 
