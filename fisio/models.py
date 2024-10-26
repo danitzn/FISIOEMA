@@ -105,14 +105,14 @@ class HorarioAtencion(models.Model):
     ]
 
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE, related_name='horarios_atencion')
-    dia = models.DateField()  # Cambiamos a DateField para incluir fechas
+    fecha = models.DateField()  # Cambiamos a DateField para incluir fechas
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     idturno = models.CharField(max_length=1, choices=TURNOS_CHOICES, blank=True)
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='horarios_atencion')
 
     def __str__(self):
-        return f"{self.dia} ({self.hora_inicio} - {self.hora_fin}) - {self.servicio}"
+        return f"{self.fecha} ({self.hora_inicio} - {self.hora_fin}) - {self.servicio}"
 
     def save(self, *args, **kwargs):
         """ Sobreescribe el método save para realizar las validaciones antes de guardar """
@@ -126,11 +126,11 @@ class HorarioAtencion(models.Model):
             raise ValueError("La hora de inicio debe ser menor que la hora de fin.")
         
         # 2. Validar que la fecha no sea menor a hoy
-        if self.dia < date.today():
+        if self.fecha< date.today():
             raise ValueError("La fecha no puede ser menor que la fecha de hoy.")
         
         # 3. Validar que el día no sea domingo
-        if self.dia.weekday() == 6:  # 6 representa el domingo en Python
+        if self.fecha.weekday() == 6:  # 6 representa el domingo en Python
             raise ValueError("No se pueden agendar turnos los días domingo.")
         
 
@@ -379,3 +379,25 @@ class Area(models.Model):
         return self.nombre
 
 
+class Consulta(models.Model):
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+    hora = models.TimeField()
+    motivo_consulta = models.TextField()
+    diagnostico = models.TextField()
+    tratamiento = models.TextField()
+
+    def __str__(self):
+        return f"Consulta de {self.paciente} con {self.profesional} el {self.fecha} a las {self.hora}"
+
+class Tratamiento(models.Model):
+    consulta = models.ForeignKey(Consulta, on_delete=models.CASCADE)
+    descripcion = models.TextField()
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+
+    def __str__(self):
+        return f"Tratamiento de {self.consulta.paciente} - {self.fecha_inicio} al {self.fecha_fin}"
+    

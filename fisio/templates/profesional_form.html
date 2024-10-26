@@ -1,15 +1,20 @@
+
 {% extends 'base_administrativo.html' %}
 {% load static %}
 
 {% block title %}Crear Profesional{% endblock %}
+<h2 class="text-2xl font-semibold mb-4">Profesionales</h2>
 
 {% block content %}
 <div class="container">
     <h1>Crear Profesional</h1>
     <form method="post">
         {% csrf_token %}
+        
+    <div class="row g-8">
+        <div class="col-md-10">
         {{ form.as_p }}
-        <div class="button-container d-flex justify-content-between mt-3">
+        <div class="button-container d-flex justify-content-between mt-6">
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a href="{% url 'profesional_list' %}" class="btn btn-secondary">Cancelar</a>
         </div>

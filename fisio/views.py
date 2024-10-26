@@ -1,15 +1,23 @@
 # views.py
+
+from django.utils import timezone  
+from datetime import datetime
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Agendamiento, HorarioAtencion, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.decorators.csrf import requires_csrf_token
 
+
+#logoutViews
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 
 #areas y servicios
@@ -220,53 +228,82 @@ class AgendamientoCreateView(CreateView):
     success_url = reverse_lazy('confirmacion_agendamiento')
 
     def form_valid(self, form):
-        # Obtener los datos del formulario
         profesional = form.cleaned_data['profesional']
         servicio = form.cleaned_data['servicio']
-        dia = form.cleaned_data['dia']
+        fecha = form.cleaned_data['fecha']
         hora = form.cleaned_data['hora']
 
-        # Validar si existe un agendamiento que ya ocupe ese espacio de tiempo
+        # Validar que la fecha no sea anterior a hoy
+        if fecha < timezone.now().date():
+            messages.error(self.request, "No se puede cargar un agendamiento en una fecha pasada.")
+            return self.form_invalid(form)
+
+        # Validar que el profesional tenga horario de atención
+        horario_profesional = HorarioAtencion.objects.filter(
+            profesional=profesional,
+            servicio=servicio,
+            fecha=fecha,
+            hora_inicio__lte=hora,
+            hora_fin__gte=hora
+        ).exists()
+        
+        if not horario_profesional:
+            messages.error(self.request, "El profesional no tiene horario de atención en esta especialidad y fecha.")
+            return self.form_invalid(form)
+
+        # Validar conflictos de agendamiento
         conflicto = Agendamiento.objects.filter(
             profesional=profesional,
             servicio=servicio,
-            dia=dia,
+            fecha=fecha,
             hora=hora
         ).exists()
 
         if conflicto:
-            # Si hay un conflicto, agregar un mensaje de error y volver al formulario
             messages.error(self.request, "Ya existe un turno reservado para este profesional a esa hora.")
             return self.form_invalid(form)
 
-        # Si no hay conflicto, se procede a guardar con estado 'Pendiente de Confirmación'
+        # Si no hay conflictos, guardar el agendamiento con estado 'Pendiente de Confirmación'
         form.instance.estado = 'Pendiente de Confirmación'
+        messages.success(self.request, "Agendamiento creado exitosamente.")
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        horarios_disponibles = HorarioAtencion.objects.all()
-        if not horarios_disponibles:
-            messages.info(self.request, "No existen turnos disponibles.")
-        context['horarios_disponibles'] = horarios_disponibles
-        return context
-
 class ConfirmacionAgendamientoView(TemplateView):
-    template_name = 'confirmacion_agendamiento.html'
+    template_name = 'agendamiento_confirmacion.html'
 
 class AgendamientoListView(ListView):
     model = Agendamiento
     template_name = 'agendamiento_list.html'
     context_object_name = 'agendamientos'
 
-# Vista para ver detalles de un agendamiento
 class AgendamientoDetailView(DetailView):
     model = Agendamiento
     template_name = 'agendamiento_detail.html'
     context_object_name = 'agendamiento'
 
-class HorarioAtencionView(TemplateView):
-    template_name = 'horario_atencion.html'
+class AgendamientoUpdateView(UpdateView):
+    model = Agendamiento
+    form_class = AgendamientoForm
+    template_name = 'agendamiento_form.html'
+    success_url = reverse_lazy('agendamiento_list')
+
+class AgendamientoDeleteView(DeleteView):
+    model = Agendamiento
+    template_name = 'agendamiento_confirm_delete.html'
+    success_url = reverse_lazy('agendamiento_list')
+
+class HorarioAtencionListView(ListView):
+    model = HorarioAtencion
+    template_name = 'horario_list.html'
+    context_object_name = 'horarios_atencion'
+
+    def get_queryset(self):
+        return HorarioAtencion.objects.filter(profesional__isnull=False)
+
+class HorarioAtencionDetailView(DetailView):
+    model = HorarioAtencion
+    template_name = 'horario_detail.html'
+    context_object_name = 'horario_atencion'
 
 class HorarioAtencionCreateView(CreateView):
     model = HorarioAtencion
@@ -284,18 +321,3 @@ class HorarioAtencionDeleteView(DeleteView):
     model = HorarioAtencion
     template_name = 'horario_confirm_delete.html'
     success_url = reverse_lazy('horario_list')
-
-class HorarioAtencionListView(ListView):
-    model = HorarioAtencion
-    template_name = 'horario_list.html'
-    context_object_name = 'horarios_atencion'
-
-    def get_queryset(self):
-            # Asegúrate de filtrar correctamente los objetos que quieres mostrar
-            return HorarioAtencion.objects.filter(profesional__isnull=False)
-
-
-class HorarioAtencionDetailView(DetailView):
-    model = HorarioAtencion
-    template_name = 'horario_detail.html'
-    context_object_name = 'horario_atencion'

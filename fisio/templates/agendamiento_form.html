@@ -6,22 +6,30 @@
 
     <form method="post" class="bg-white p-4 rounded-lg shadow-md">
         {% csrf_token %}
+        
         <div class="row g-3">
             <div class="col-md-6">
                 <label for="id_profesional" class="form-label">Profesional</label>
                 {{ form.profesional }}
             </div>
             <div class="col-md-6">
-                <label for="id_servicio" class="form-label">Servicio</label>
-                {{ form.servicio }}
+                <label for="id_paciente" class="form-label">Paciente</label>
+                {{ form.paciente }}
             </div>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-3 mt-2">
             <div class="col-md-6">
-                <label for="id_dia" class="form-label">Día</label>
+                <label for="id_servicio" class="form-label">Servicio</label>
+                {{ form.servicio }}
+            </div>
+            <div class="col-md-6">
+                <label for="id_fecha" class="form-label">Fecha</label>
                 {{ form.fecha }}
             </div>
+        </div>
+
+        <div class="row g-3 mt-2">
             <div class="col-md-6">
                 <label for="id_hora" class="form-label">Hora</label>
                 {{ form.hora }}
@@ -36,7 +44,7 @@
         {% if messages %}
             <ul class="messages mt-3">
                 {% for message in messages %}
-                    <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                    <li {% if message.tags %} class="alert {{ message.tags }}" {% endif %}>
                         {{ message }}
                     </li>
                 {% endfor %}

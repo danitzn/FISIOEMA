@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrar Agendamiento</title>
+    <link rel="stylesheet" href="path/to/your/styles.css">
+</head>
+<body>
+    <h1>Delete Agendamiento</h1>
+    <p>Estas seguro de eliminar el agendamiento realizado?</p>
+    <form action="{% url 'agendamiento_delete' agendamiento.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Si, eliminar</button>
+        <a href="{% url 'agendamiento_list' %}">Cancelar</a>
+    </form>
+</body>
+</html>

@@ -1,10 +1,9 @@
 # urls.py
 from django import views
 from django.urls import path
-# from . import views
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, AgendamientoDetailView, AgendamientoListView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
     ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, home,registro,login_view,
@@ -50,9 +49,10 @@ urlpatterns = [
     path('agendamientos/', AgendamientoListView.as_view(), name='agendamiento_list'),
     path('agendamientos/<int:pk>/', AgendamientoDetailView.as_view(), name='agendamiento_detail'),
     path('agendamientos/nuevo/', AgendamientoCreateView.as_view(), name='agendamiento_create'),
-
-    # path('agendamientos/nuevo/', AgendamientoCreateView.as_view(), name='agendamiento_nuevo'),
+    path('agendamientos/<int:pk>/editar/', AgendamientoUpdateView.as_view(), name='agendamiento_update'),
     path('agendamientos/confirmacion/', ConfirmacionAgendamientoView.as_view(), name='confirmacion_agendamiento'),
+    path('agendamientos/eliminar/<int:pk>/', AgendamientoDeleteView.as_view(), name='agendamiento_delete'),
+
 
 
     # Usuario URLs
@@ -62,6 +62,7 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard'),
     path('', home, name='home'),  # Página de inicio (login)
     path('login/', home, name='login'),
+    path('logout/', home, name='logout'),
     
 ]
 
