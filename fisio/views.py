@@ -1,11 +1,12 @@
 # views.py
 
+import json
 from django.utils import timezone  
-from datetime import datetime
-from django.shortcuts import redirect, render
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Agendamiento, HorarioAtencion, Paciente, Profesional, Servicio, Area
+from .models import Agendamiento, Consulta, HorarioAtencion, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
@@ -196,7 +197,7 @@ def dashboard_view(request):
     perfil = request.user.perfil.tipo
     
     if perfil == 'ADMINISTRADOR':
-        return render(request, 'dashboard_administrador.html')
+        return render(request, 'calendario_admin.html')
     elif perfil == 'PROFESIONAL':
         return render(request, 'dashboard_profesional.html')
     elif perfil == 'PACIENTE':
@@ -321,3 +322,55 @@ class HorarioAtencionDeleteView(DeleteView):
     model = HorarioAtencion
     template_name = 'horario_confirm_delete.html'
     success_url = reverse_lazy('horario_list')
+
+
+
+
+def calendario(request):
+    # Obtenemos todos los agendamientos desde el modelo
+    agendamientos = Agendamiento.objects.all()
+
+    # Convertimos los agendamientos a una lista de diccionarios con el formato adecuado
+    eventos = []
+    for agendamiento in agendamientos:
+        # Combinar fecha y hora en un objeto datetime
+        start_datetime = datetime.combine(agendamiento.fecha, agendamiento.hora)
+
+        # Calcular la hora de finalización (por ejemplo, 1 hora después del inicio)
+        end_datetime = start_datetime + timedelta(hours=1)
+
+        # Formateamos la información del evento para FullCalendar
+        eventos.append({
+            "title": f"{agendamiento.paciente.nombre} - {agendamiento.servicio.nombre}",
+            "start": start_datetime.isoformat(),  # Formato ISO
+            "end": end_datetime.isoformat(),      # Formato ISO
+            "url": request.build_absolute_uri(f"/generar_consulta/{agendamiento.id}/"),
+            "estado": agendamiento.estado,
+            "backgroundColor": "#dc3545",
+            "borderColor": "#dc3545"
+        })
+    # Pasamos los eventos serializados en JSON al template
+    return render(request, 'calendario_admin.html', {
+        'eventos_json': json.dumps(eventos)
+    })
+def generar_consulta(request, agendamiento_id):
+    agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
+    if agendamiento.estado == 'en_curso':
+        return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
+    if request.method == 'POST':
+        motivo_consulta = request.POST.get('motivo_consulta')
+        diagnostico = request.POST.get('diagnostico')
+        fecha_consulta = request.POST.get('fecha_consulta')
+        Consulta.objects.create(
+            paciente=agendamiento.paciente,
+            profesional=agendamiento.profesional,
+            fecha=fecha_consulta,
+            servicio=agendamiento.servicio,
+            hora=agendamiento.hora,
+            motivo_consulta=motivo_consulta,
+            diagnostico=diagnostico
+        )
+        agendamiento.estado = 'en_curso'
+        agendamiento.save()
+        return redirect('calendario_admin')
+    return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})

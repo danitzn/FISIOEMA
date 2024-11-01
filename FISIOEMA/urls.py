@@ -6,7 +6,7 @@ from fisio.views import (
     AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
-    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, home,registro,login_view,
+    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, generar_consulta, home,registro,login_view, calendario
 )
 
 urlpatterns = [
@@ -52,8 +52,8 @@ urlpatterns = [
     path('agendamientos/<int:pk>/editar/', AgendamientoUpdateView.as_view(), name='agendamiento_update'),
     path('agendamientos/confirmacion/', ConfirmacionAgendamientoView.as_view(), name='confirmacion_agendamiento'),
     path('agendamientos/eliminar/<int:pk>/', AgendamientoDeleteView.as_view(), name='agendamiento_delete'),
-
-
+    path('calendario_admin/',calendario, name='calendario_admin'),
+    path('generar_consulta/<int:agendamiento_id>/', generar_consulta, name='generar_consulta'),
 
     # Usuario URLs
     path('admin/', admin.site.urls, name='admin'),

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrativo - FISIOEMA</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body { background-color: #e0d7f5; } /* Lila suave */
+        .sidebar {
+            height: 100vh;
+            background-color: #333;
+            padding-top: 20px;
+        }
+        .sidebar ul { list-style-type: none; padding: 0; }
+        .sidebar ul li { padding: 15px; }
+        .sidebar ul li a { color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background-color: #6A5ACD; }
+    </style>
+</head>
+<body>
+    {% load static %}
+    <!-- Encabezado -->
+    <header class="header bg-dark text-white p-2 d-flex justify-content-between align-items-center">
+        <!-- Logo a la izquierda -->
+        <div class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/logofisio.png' %}" alt="Logo" class="img-fluid" style="max-height: 50px; max-width: 150px;">
+            </a>
+        </div>
+        <!-- Nombre de usuario y fecha a la derecha -->
+        <div class="text-end">
+            <span class="username">{{ user.get_full_name|default:user.username }}</span> - 
+            {% now "l, d/m/Y" %}
+        </div>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Barra lateral -->
+            <nav class="col-md-2 sidebar">
+                <ul>
+                    <li><a href="{% url 'profesional_list' %}"><span class="icon"></span> Profesionales</a></li>
+                    <li><a href="{% url 'paciente_list' %}"><span class="icon"></span> Pacientes</a></li>
+                    <li><a href="#"><span class="icon"></span> Tarifas</a></li>
+                    <li><a href="{% url 'agendamiento_list' %}"><span class="icon">️</span> Agendamientos</a></li>
+                    <!-- <li><a href="#"><span class="icon"></span> Historias Clínicas</a></li> -->
+                    <li><a href="{% url 'horario_list'%}"><span class="icon"></span> Horario de atención</a></li>
+                    <li><a href="{% url 'area_list' %}"><span class="icon">️</span> Areas</a></li>
+                    <li><a href="#"><span class="icon"></span> Flujo de Caja</a></li>
+                    <li><a href="/admin/"><span class="icon"></span> Permisos y Roles</a></li>
+                    <li><a href="/admin/"><span class="icon">⚙️</span> Configuración</a></li>
+                </ul>
+            </nav>
+            <!-- Contenido principal -->
+            <main class="col-md-10 p-4">
+                {% block content %}
+                <!-- Aquí se insertará el contenido específico de cada vista -->
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

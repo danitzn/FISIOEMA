@@ -387,7 +387,6 @@ class Consulta(models.Model):
     hora = models.TimeField()
     motivo_consulta = models.TextField()
     diagnostico = models.TextField()
-    tratamiento = models.TextField()
 
     def __str__(self):
         return f"Consulta de {self.paciente} con {self.profesional} el {self.fecha} a las {self.hora}"
