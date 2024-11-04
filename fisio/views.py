@@ -351,7 +351,7 @@ def calendario(request):
     
     # Pasamos los eventos serializados en JSON al template
     eventos_json = json.dumps(eventos) if eventos else '[]'
-    return render(request, 'calendario_admin', {
+    return render(request, 'calendario_admin.html', {
         'eventos_json': eventos_json
     })
 
