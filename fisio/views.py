@@ -197,7 +197,7 @@ def dashboard_view(request):
     perfil = request.user.perfil.tipo
     
     if perfil == 'ADMINISTRADOR':
-        return render(request, 'calendario_admin.html')
+        return render(request, 'dashboard_administrador.html')
     elif perfil == 'PROFESIONAL':
         return render(request, 'dashboard_profesional.html')
     elif perfil == 'PACIENTE':
@@ -324,8 +324,7 @@ class HorarioAtencionDeleteView(DeleteView):
     success_url = reverse_lazy('horario_list')
 
 
-
-
+#calendario
 def calendario(request):
     # Obtenemos todos los agendamientos desde el modelo
     agendamientos = Agendamiento.objects.all()
@@ -349,10 +348,15 @@ def calendario(request):
             "backgroundColor": "#dc3545",
             "borderColor": "#dc3545"
         })
+    
     # Pasamos los eventos serializados en JSON al template
-    return render(request, 'calendario_admin.html', {
-        'eventos_json': json.dumps(eventos)
+    eventos_json = json.dumps(eventos) if eventos else '[]'
+    return render(request, 'calendario_admin', {
+        'eventos_json': eventos_json
     })
+
+
+#consultas#
 def generar_consulta(request, agendamiento_id):
     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
     if agendamiento.estado == 'en_curso':
