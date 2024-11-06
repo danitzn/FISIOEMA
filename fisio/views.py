@@ -356,7 +356,29 @@ def calendario(request):
     })
 
 
-#consultas#
+# #consultas#
+# def generar_consulta(request, agendamiento_id):
+#     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
+#     if agendamiento.estado == 'en_curso':
+#         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
+#     if request.method == 'POST':
+#         motivo_consulta = request.POST.get('motivo_consulta')
+#         diagnostico = request.POST.get('diagnostico')
+#         fecha_consulta = request.POST.get('fecha_consulta')
+#         Consulta.objects.create(
+#             paciente=agendamiento.paciente,
+#             profesional=agendamiento.profesional,
+#             fecha=fecha_consulta,
+#             servicio=agendamiento.servicio,
+#             hora=agendamiento.hora,
+#             motivo_consulta=motivo_consulta,
+#             diagnostico=diagnostico
+#         )
+#         agendamiento.estado = 'en_curso'
+#         agendamiento.save()
+#         return redirect('calendario_admin')
+#     return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+
 def generar_consulta(request, agendamiento_id):
     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
     if agendamiento.estado == 'en_curso':
@@ -374,7 +396,7 @@ def generar_consulta(request, agendamiento_id):
             motivo_consulta=motivo_consulta,
             diagnostico=diagnostico
         )
-        agendamiento.estado = 'en_curso'
+        agendamiento.estado = 'finalizado'
         agendamiento.save()
         return redirect('calendario_admin')
     return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})

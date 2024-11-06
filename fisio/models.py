@@ -171,18 +171,18 @@ class Agendamiento(models.Model):
     
     def clean(self):
         # Validar si ya existe un agendamiento en el mismo horario para el mismo profesional y servicio.
-        if Agendamiento.objects.filter(
-                profesional=self.profesional,
-                servicio=self.servicio,
-                fecha=self.fecha,
-                hora=self.hora).exists():
+        agendamientos_conflictivos = Agendamiento.objects.filter(
+            profesional=self.profesional,
+            servicio=self.servicio,
+            fecha=self.fecha,
+            hora=self.hora
+        ).exclude(id=self.id)  # Excluir el agendamiento actual si se está editando
+
+        if agendamientos_conflictivos.exists():
             raise ValidationError("Este turno ya está reservado para este profesional.")
 
     def __str__(self):
         return f"{self.profesional} - {self.servicio} ({self.fecha} a las {self.hora})"
-
-
-
 
 class Evaluacion(models.Model):
     agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='evaluaciones')
