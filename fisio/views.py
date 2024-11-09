@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Agendamiento, Consulta, HorarioAtencion, Paciente, Profesional, Servicio, Area
+from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
@@ -355,6 +355,45 @@ def calendario(request):
         'eventos_json': eventos_json
     })
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
+from django.views.generic import ListView
+from django.db.models import Sum
+from .models import FlujoCaja, Consulta
+
+class FlujoCajaListView(ListView):
+    model = FlujoCaja
+    template_name = 'flujo_caja_list.html'
+    context_object_name = 'flujos'
+
+    def get_queryset(self):
+        queryset = FlujoCaja.objects.all()
+        today = timezone.now().date()
+
+        # Parámetros de filtro de fecha desde y hasta
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+
+        if fecha_desde and fecha_hasta:
+            queryset = queryset.filter(fecha__range=[fecha_desde, fecha_hasta])
+        else:
+            # Si no hay parámetros de fecha, filtrar por la fecha de hoy
+            queryset = queryset.filter(fecha=today)
+
+        # Cálculos para total de entradas y salidas
+        self.total_entradas = queryset.filter(tipo_operacion='R').aggregate(total=Sum('monto'))['total'] or 0
+        self.total_salidas = queryset.filter(tipo_operacion='P').aggregate(total=Sum('monto'))['total'] or 0
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        # Añadir el total de entradas y salidas al contexto
+        context = super().get_context_data(**kwargs)
+        context['total_entradas'] = self.total_entradas
+        context['total_salidas'] = self.total_salidas
+        return context
+
+
 
 # #consultas#
 # def generar_consulta(request, agendamiento_id):
@@ -400,3 +439,39 @@ def generar_consulta(request, agendamiento_id):
         agendamiento.save()
         return redirect('calendario_admin')
     return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+
+
+def buscar_consultas_por_ci(request):
+    consultas = None
+    nrodocumento = None
+
+    if request.method == "POST":
+        nrodocumento = request.POST.get("nrodocumento")
+        consultas = Consulta.objects.filter(paciente__nrodocumento=nrodocumento, estado__in=['Pendiente', 'Pago Parcial', 'P', 'PP'])
+
+    return render(request, "buscar_consultas.html", {"consultas": consultas, "nrodocumento": nrodocumento})
+
+def cobrar_consulta(request, consulta_id):
+    consulta = get_object_or_404(Consulta, id=consulta_id)
+
+    if request.method == "POST":
+        medio_pago = request.POST.get("medio_pago")
+        monto = consulta.servicio.monto
+
+        # Crear registro en FlujoCaja sin el campo consulta
+        FlujoCaja.objects.create(
+            persona=consulta.paciente.nrodocumento,  # Usamos el CI del paciente como persona
+            fecha=consulta.fecha,                    # Usar la fecha de la consulta
+            monto=monto,
+            tipo_operacion="R",                      # 'R' para recibo (entrada de dinero)
+            medio_pago=medio_pago,
+        )
+
+        # Cambiar estado de la consulta a 'C' de Cancelado
+        consulta.estado = "C"
+        consulta.save()
+    
+        return redirect("buscar_consultas_por_ci")  # Redirige de vuelta a la página de búsqueda
+
+    return render(request, "cobrar_consulta.html", {"consulta": consulta})
+

@@ -71,6 +71,7 @@ class Paciente(models.Model):
     
 class Servicio(models.Model):
     nombre = models.CharField(max_length=50)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.nombre
@@ -229,17 +230,19 @@ class TipoProfesionalArea(models.Model):
     def __str__(self):
         return self.nombre
 
-class Tarifa(models.Model):
-    nombre = models.CharField(max_length=50)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
+# class Tarifa(models.Model):
+#     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+#     nombre = models.CharField(max_length=50)
+#     monto = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.nombre
 
 class Cobro(models.Model):
-    tarifa = models.ForeignKey(Tarifa, on_delete=models.CASCADE)
+    # tarifa = models.ForeignKey(Tarifa, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=100)
     fecha = models.DateField()
+
 
     def __str__(self):
         return f"Cobro de {self.tarifa.nombre} - {self.fecha}"
@@ -380,6 +383,12 @@ class Area(models.Model):
 
 
 class Consulta(models.Model):
+    ESTADO_CHOICES = [
+        ('C', 'Cancelado'),
+        ('P', 'Pendiente'),
+        ('PP', 'Pago Parcial'),
+    ]
+    estado = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
     fecha = models.DateField()
@@ -400,3 +409,23 @@ class Tratamiento(models.Model):
     def __str__(self):
         return f"Tratamiento de {self.consulta.paciente} - {self.fecha_inicio} al {self.fecha_fin}"
     
+
+class FlujoCaja(models.Model):
+    persona = models.CharField(max_length=20, null=True, blank=True)  # CI de paciente, profesional, o ninguno
+    fecha = models.DateField(auto_now_add=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=0)
+    TIPO_OPERACION_CHOICES = [
+        ('R', 'Recibo (Entrada)'),
+        ('P', 'Pago (Salida)'),
+    ]
+    tipo_operacion = models.CharField(max_length=1, choices=TIPO_OPERACION_CHOICES)
+    MEDIO_PAGO_CHOICES = [
+        ('E', 'Efectivo'),
+        ('T', 'Transferencia'),
+        ('C', 'Cheque'),
+        ('O', 'Otros'),
+    ]
+    medio_pago = models.CharField(max_length=1, choices=MEDIO_PAGO_CHOICES)
+
+    def __str__(self):
+        return f"{self.persona} - {self.tipo_operacion} - {self.monto}"

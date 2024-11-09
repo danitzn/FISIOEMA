@@ -1,0 +1,21 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <h2>Cobrar Consulta de {{ consulta.paciente.nombre }}</h2>
+    <p>Servicio: {{ consulta.servicio.nombre }}</p>
+    <p>Fecha: {{ consulta.fecha }}</p>
+    <p>Monto: {{ consulta.servicio.monto }}</p>
+
+    <label for="medio_pago">Medio de Pago:</label>
+    <select id="medio_pago" name="medio_pago" required>
+        <option value="E">Efectivo</option>
+        <option value="T">Transferencia</option>
+        <option value="C">Cheque</option>
+        <option value="O">Otros</option>
+    </select>
+
+    <button type="submit">Confirmar Cobro</button>
+</form>
+{% endblock %}  

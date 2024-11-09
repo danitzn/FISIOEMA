@@ -3,10 +3,10 @@ from django import views
 from django.urls import path
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
-    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, dashboard_view, generar_consulta, home,registro,login_view, calendario
+    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home,registro,login_view, calendario
 )
 
 urlpatterns = [
@@ -65,6 +65,13 @@ urlpatterns = [
     path('', home, name='home'),  # Página de inicio (login)
     path('login/', home, name='login'),
     path('logout/', home, name='logout'),
+
+    #cobros, consultas
+    path("buscar-consultas/", buscar_consultas_por_ci, name="buscar_consultas_por_ci"),
+    path("cobrar-consulta/<int:consulta_id>/", cobrar_consulta, name="cobrar_consulta"),
+    path("cobrar-consulta/<int:consulta_id>/", cobrar_consulta, name="cobrar_consulta"),
+    path('flujo_caja_list/', FlujoCajaListView.as_view(), name='flujo_caja_list'),
+    
     
 ]
 
