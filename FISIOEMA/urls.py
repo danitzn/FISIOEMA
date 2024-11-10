@@ -18,9 +18,9 @@ urlpatterns = [
     path('areas/<int:pk>/eliminar/', AreaDeleteView.as_view(), name='area_delete'),
     path('servicios/', ServicioListView.as_view(), name='servicio_list'),
     path('servicios/<int:pk>/', ServicioDetailView.as_view(), name='servicio_detail'),
-    path('servicios/nuevo/', ServicioCreateView.as_view(), name='servicio_create'),
+    path('servicios/nuevo/', ServicioCreateView.as_view(), name='servicio_form'),
     path('servicios/<int:pk>/editar/', ServicioUpdateView.as_view(), name='servicio_update'),
-    path('servicios/<int:pk>/eliminar/', ServicioDeleteView.as_view(), name='servicio_delete'),
+    path('servicios/<int:pk>/eliminar/', ServicioDeleteView.as_view(), name='servicio_confirm_delete'),
 
     
     #horarios de atencion
