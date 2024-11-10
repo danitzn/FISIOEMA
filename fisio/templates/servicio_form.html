@@ -1,0 +1,39 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Formulario de Tarifas de Servicio</h2>
+
+<form method="post" class="bg-white p-4 rounded-lg shadow-md">
+    {% csrf_token %}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="id_nombre" class="form-label">Nombre del Servicio</label>
+            {{ form.nombre }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_monto" class="form-label">Monto</label>
+            {{ form.monto }}
+        </div>
+    </div>
+
+    <!-- Mostrar errores del formulario si los hay -->
+    {% if form.errors %}
+        <div class="alert alert-danger mt-4">
+            <strong>Errores en el formulario:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="mt-4 d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'servicio_list' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

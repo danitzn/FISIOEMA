@@ -1,0 +1,47 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+{% block title %}Áreas de Servicio{% endblock %}
+
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Áreas de Servicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</html>
+
+
+<h1>Servicio Tarifas</h1>
+
+<a href="{% url 'servicio_form' %}" class="btn btn-success mb-3">Crear Nueva Servicio</a>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>servicio</th>
+      <th>Precio</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for servicio in servicios %}
+    <tr>
+      <td>{{ servicio.nombre }}</td>
+      <td>{{ servicio.monto }}</td>
+      <td>
+        <a href="{% url 'servicio_detail' servicio.pk %}" class="btn btn-info">Ver</a>
+        <a href="{% url 'servicio_update' servicio.pk %}" class="btn btn-warning">Editar</a>
+        <a href="{% url 'servicio_confirm_delete' servicio.pk %}" class="btn btn-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

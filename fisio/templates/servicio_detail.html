@@ -1,0 +1,8 @@
+{% load static %}
+<h2>Detalle del Servicio</h2>
+<p><strong>Nombre:</strong> {{ servicio.nombre }}</p>
+<p><strong>Monto:</strong> {{ servicio.monto }}</p>
+
+<a href="{% url 'servicio_update' servicio.id %}">Editar</a>
+<a href="{% url 'servicio_confirm_delete' servicio.id %}">Eliminar</a>
+<a href="{% url 'servicio_list' %}">Volver a la lista</a>
