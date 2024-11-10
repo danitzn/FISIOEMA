@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Eliminar Servicio</title>
+</html>
+{% load static %}
+<h2>Confirmar Eliminación</h2>
+<p>¿Estás seguro que deseas eliminar a {{ servicio.nombre }}?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Sí, eliminar</button>
+</form>
+<a href="{% url 'servicio_list' %}">Cancelar</a>
