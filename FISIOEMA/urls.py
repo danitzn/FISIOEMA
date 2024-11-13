@@ -3,7 +3,7 @@ from django import views
 from django.urls import path
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
+    AgendamientoCreateView, AgendamientoDeleteView, AgendamientoDetailView, AgendamientoListView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteListView, PacienteDetailView, PacienteCreateView,
     PacienteUpdateView, PacienteDeleteView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView,
     ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home,registro,login_view, calendario
@@ -25,7 +25,7 @@ urlpatterns = [
     
     #horarios de atencion
     path('horarios/', HorarioAtencionListView.as_view(), name='horario_list'),
-    path('horarios/<int:pk>/', HorarioAtencionListView.as_view(), name='horario_detail'),
+    path('horarios/<int:pk>/', HorarioAtencionDetailView.as_view(), name='horario_detail'),
     path('horarios/nuevo/', HorarioAtencionCreateView.as_view(), name='horario_create'),
     path('horarios/<int:pk>/editar/', HorarioAtencionUpdateView.as_view(), name='horario_update'),
     path('horarios/<int:pk>/eliminar/', HorarioAtencionDeleteView.as_view(), name='horario_delete'),
