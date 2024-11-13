@@ -1,28 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horario Detail</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <header>
-        <h1>Horario Detail</h1>
-    </header>
-    <main>
-        <section>
-            <h2>{{ horario.title }}</h2>
-            <p>{{ horario.description }}</p>
-            <ul>
-                {% for item in horario.items %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 FISIOEMA</p>
-    </footer>
-</body>
-</html>
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block title %}Detalle del Horario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-primary">Detalle del Horario</h2>
+
+        <p><strong>Profesional:</strong> {{ horario_atencion.profesional }}</p>
+        <p><strong>Servicio:</strong> {{ horario_atencion.servicio }}</p>
+        <p><strong>Dia:</strong> {{ horario_atencion.fecha }}</p>
+        <p><strong>Hora Inicio:</strong> {{ horario_atencion.hora_inicio }}</p>
+        <p><strong>Hora Fin:</strong> {{ horario_atencion.hora_fin }}</p>
+        <p><strong>Turno:</strong> {{ horario_atencion.idturno }}</p>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'horario_update' horario_atencion.id %}" class="btn btn-primary">Editar</a>
+            <a href="{% url 'horario_delete' horario_atencion.id %}" class="btn btn-danger">Eliminar</a>
+            <a href="{% url 'horario_list' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

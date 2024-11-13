@@ -20,7 +20,7 @@
                 <th>Hora Inicio</th>
                 <th>Hora Fin</th>
                 <th>Turno</th>
-                <th>Acciones</th> <!-- Añadimos esta columna para los botones de acción -->
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -33,7 +33,6 @@
                 <td>{{ horario.hora_fin }}</td>
                 <td>{{ horario.get_idturno_display }}</td>
                 <td>
-                    <!-- Botones de acción para visualizar, editar y eliminar -->
                     <a href="{% url 'horario_detail' horario.pk %}" class="btn btn-info btn-sm">Visualizar</a>
                     <a href="{% url 'horario_update' horario.pk %}" class="btn btn-warning btn-sm">Editar</a>
                     <a href="{% url 'horario_delete' horario.pk %}" class="btn btn-danger btn-sm"

@@ -1,11 +1,23 @@
+{% extends 'base_administrativo.html' %}
 {% load static %}
-<h2>Detalle del Paciente</h2>
-<p><strong>Nombre:</strong> {{ paciente.nombre }}</p>
-<p><strong>Apellido:</strong> {{ paciente.apellido }}</p>
-<p><strong>Fecha de Nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
-<p><strong>Celular:</strong> {{ paciente.celular }}</p>
-<p><strong>Diagnóstico Médico:</strong> {{ paciente.diagnostico_medico }}</p>
 
-<a href="{% url 'paciente_update' paciente.id %}">Editar</a>
-<a href="{% url 'paciente_delete' paciente.id %}">Eliminar</a>
-<a href="{% url 'paciente_list' %}">Volver a la lista</a>
+{% block title %}Detalle del Paciente{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-primary">Detalle del Paciente</h2>
+        <p><strong>Nombre:</strong> {{ paciente.nombre }}</p>
+        <p><strong>Apellido:</strong> {{ paciente.apellido }}</p>
+        <p><strong>Fecha de Nacimiento:</strong> {{ paciente.fecha_nacimiento|date:"d/m/Y" }}</p>
+        <p><strong>Celular:</strong> {{ paciente.celular }}</p>
+        <p><strong>Diagnóstico Médico:</strong> {{ paciente.diagnostico_medico }}</p>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'paciente_update' paciente.id %}" class="btn btn-primary">Editar</a>
+            <a href="{% url 'paciente_delete' paciente.id %}" class="btn btn-danger">Eliminar</a>
+            <a href="{% url 'paciente_list' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
