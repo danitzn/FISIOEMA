@@ -1,4 +1,3 @@
-
 {% extends 'base_administrativo.html' %}
 {% load static %}
 
@@ -6,18 +5,76 @@
 <h2 class="text-2xl font-semibold mb-4">Profesionales</h2>
 
 {% block content %}
-<div class="container">
-    <h1>Crear Profesional</h1>
-    <form method="post">
-        {% csrf_token %}
-        
-    <div class="row g-8">
-        <div class="col-md-10">
-        {{ form.as_p }}
-        <div class="button-container d-flex justify-content-between mt-6">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{% url 'profesional_list' %}" class="btn btn-secondary">Cancelar</a>
+<div class="container-fluid">
+    <div class="form-container row justify-content-center">
+        <div class="col-12 col-md-10">
+            <h1>Crear Profesional</h1>
+            <form method="post" class="bg-white p-4 rounded-lg shadow-md">
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <!-- Primera fila: Nro. de Documento y Nombre -->
+                    <div class="col-md-6">
+                        <label for="id_nrodocumento" class="form-label">Nro. de Documento</label>
+                        {{ form.nrodocumento }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_nombre" class="form-label">Nombre</label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <!-- Segunda fila: Apellido y Fecha de Nacimiento -->
+                    <div class="col-md-6">
+                        <label for="id_apellido" class="form-label">Apellido</label>
+                        {{ form.apellidos }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+
+                    <!-- Tercera fila: Celular y Correo Electrónico -->
+                    <div class="col-md-6">
+                        <label for="id_celular" class="form-label">Celular</label>
+                        {{ form.celular }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_correo" class="form-label">Correo Electrónico</label>
+                        {{ form.correo }}
+                    </div>
+
+                    <!-- Fila adicional: Sexo, Activo y Responsable Área (si se necesitan) -->
+                    <div class="col-md-4">
+                        <label for="id_sexo" class="form-label">Sexo</label>
+                        {{ form.sexo }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_responsable" class="form-label">Responsable área</label>
+                        {{ form.responsable_area }}
+                    </div>
+                    <div class="col-md-1">
+                        <label for="id_activo" class="form-label">Activo</label>
+                        {{ form.activo }}
+                    </div>
+                </div>
+
+                <div class="button-container d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a href="{% url 'profesional_list' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}
+
+<style>
+    /* Asegura que los campos ocupen todo el ancho disponible */
+    .form-container .form-control {
+        width: 100%;
+    }
+    /* Mejora el espaciado entre el label y el input */
+    .form-label {
+        margin-bottom: 0.5rem;
+    }
+</style>
