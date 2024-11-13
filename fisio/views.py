@@ -355,44 +355,19 @@ def calendario(request):
         'eventos_json': eventos_json
     })
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.views.generic import ListView
-from django.db.models import Sum
-from .models import FlujoCaja, Consulta
 
 class FlujoCajaListView(ListView):
     model = FlujoCaja
     template_name = 'flujo_caja_list.html'
-    context_object_name = 'flujos'
-
+    context_object_name = 'flujo_dinero'
+    
     def get_queryset(self):
         queryset = FlujoCaja.objects.all()
-        today = timezone.now().date()
-
-        # Parámetros de filtro de fecha desde y hasta
-        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_desde = self.request.GET.get('fecha_desde') 
         fecha_hasta = self.request.GET.get('fecha_hasta')
-
         if fecha_desde and fecha_hasta:
             queryset = queryset.filter(fecha__range=[fecha_desde, fecha_hasta])
-        else:
-            # Si no hay parámetros de fecha, filtrar por la fecha de hoy
-            queryset = queryset.filter(fecha=today)
-
-        # Cálculos para total de entradas y salidas
-        self.total_entradas = queryset.filter(tipo_operacion='R').aggregate(total=Sum('monto'))['total'] or 0
-        self.total_salidas = queryset.filter(tipo_operacion='P').aggregate(total=Sum('monto'))['total'] or 0
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        # Añadir el total de entradas y salidas al contexto
-        context = super().get_context_data(**kwargs)
-        context['total_entradas'] = self.total_entradas
-        context['total_salidas'] = self.total_salidas
-        return context
-
+            return queryset
 
 
 # #consultas#
