@@ -1,0 +1,23 @@
+{% extends 'dashboard_profesional.html' %}
+{% load static %}
+
+{% block title %}Detalle del Horario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-primary">Detalle del Horario</h2>
+
+        <p><strong>Profesional:</strong> {{ horario_atencionp.profesional }}</p>
+        <p><strong>Servicio:</strong> {{ horario_atencionp.servicio }}</p>
+        <p><strong>Dia:</strong> {{ horario_atencionp.fecha }}</p>
+        <p><strong>Hora Inicio:</strong> {{ horario_atencionp.hora_inicio }}</p>
+        <p><strong>Hora Fin:</strong> {{ horario_atencionp.hora_fin }}</p>
+        <p><strong>Turno:</strong> {{ horario_atencionp.idturno }}</p>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'horario_list_prof' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

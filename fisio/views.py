@@ -21,7 +21,18 @@ def logout_view(request):
     return redirect('login')
 
 
-#areas y servicios
+#areas y servicios - Perfil Profesional
+class AreaListProfView(ListView):
+    model = Area
+    template_name = 'area_list_prof.html'
+    context_object_name = 'areasp'
+
+class AreaDetailProfView(DetailView):
+    model = Area
+    template_name = 'area_detail_prof.html'
+    context_object_name = 'areap'
+
+#areas y servicios - Perfil Admin
 class AreaListView(ListView):
     model = Area
     template_name = 'area_list.html'
@@ -78,7 +89,7 @@ class ServicioDeleteView(DeleteView):
 
 
 
-# Paciente Views
+# Paciente - Perfil Admin Views
 class PacienteListView(ListView):
     model = Paciente
     template_name = 'paciente_list.html'
@@ -106,7 +117,24 @@ class PacienteDeleteView(DeleteView):
     template_name = 'paciente_confirm_delete.html'
     success_url = reverse_lazy('paciente_list')
 
-# Profesional Views
+# Paciente - Perfil Profesional Views
+class PacienteListProfView(ListView):
+    model = Paciente
+    template_name = 'paciente_list_prof.html'
+    context_object_name = 'pacientesp'
+
+class PacienteDetailProfView(DetailView):
+    model = Paciente
+    template_name = 'paciente_detail_prof.html'
+    context_object_name = 'pacientep'
+
+class PacienteUpdateProfView(UpdateView):
+    model = Paciente
+    form_class = PacienteForm
+    template_name = 'paciente_form_prof.html'
+    success_url = reverse_lazy('paciente_list_prof')
+
+# Profesional - PERFIL ADMIN Views
 class ProfesionalListView(ListView):
     model = Profesional
     template_name = 'profesional_list.html'
@@ -134,6 +162,16 @@ class ProfesionalDeleteView(DeleteView):
     template_name = 'profesional_confirm_delete.html'
     success_url = reverse_lazy('profesional_list')
 
+# Profesional - PERFIL PROFESIONAL Views
+class ProfesionalListProfView(ListView):
+    model = Profesional
+    template_name = 'profesional_list_prof.html'
+    context_object_name = 'profesionalesp'
+
+class ProfesionalDetailProfView(DetailView):
+    model = Profesional
+    template_name = 'profesional_detail_prof.html'
+    context_object_name = 'profesionalp'
 
 #perfiles de usuario def
 
@@ -221,6 +259,7 @@ def home(request):
             return render(request, 'login.html', {'error_message': error_message})
     return render(request, 'login.html')
 
+# Agendamiento - Perfil Admin
 
 class AgendamientoCreateView(CreateView):
     model = Agendamiento
@@ -293,10 +332,99 @@ class AgendamientoDeleteView(DeleteView):
     template_name = 'agendamiento_confirm_delete.html'
     success_url = reverse_lazy('agendamiento_list')
 
+# Agendamiento - Perfil Profesional
+
+class AgendamientoCreateProfView(CreateView):
+    model = Agendamiento
+    form_class = AgendamientoForm
+    template_name = 'agendamiento_form_prof.html'
+    success_url = reverse_lazy('confirmacion_agendamiento_prof')
+
+    def form_valid(self, form):
+        profesional = form.cleaned_data['profesional']
+        servicio = form.cleaned_data['servicio']
+        fecha = form.cleaned_data['fecha']
+        hora = form.cleaned_data['hora']
+
+        # Validar que la fecha no sea anterior a hoy
+        if fecha < timezone.now().date():
+            messages.error(self.request, "No se puede cargar un agendamiento en una fecha pasada.")
+            return self.form_invalid(form)
+
+        # Validar que el profesional tenga horario de atención
+        horario_profesional = HorarioAtencion.objects.filter(
+            profesional=profesional,
+            servicio=servicio,
+            fecha=fecha,
+            hora_inicio__lte=hora,
+            hora_fin__gte=hora
+        ).exists()
+        
+        if not horario_profesional:
+            messages.error(self.request, "El profesional no tiene horario de atención en esta especialidad y fecha.")
+            return self.form_invalid(form)
+
+        # Validar conflictos de agendamiento
+        conflicto = Agendamiento.objects.filter(
+            profesional=profesional,
+            servicio=servicio,
+            fecha=fecha,
+            hora=hora
+        ).exists()
+
+        if conflicto:
+            messages.error(self.request, "Ya existe un turno reservado para este profesional a esa hora.")
+            return self.form_invalid(form)
+
+        # Si no hay conflictos, guardar el agendamiento con estado 'Pendiente de Confirmación'
+        form.instance.estado = 'Pendiente de Confirmación'
+        messages.success(self.request, "Agendamiento creado exitosamente.")
+        return super().form_valid(form)
+
+class ConfirmacionAgendamientoProfView(TemplateView):
+    template_name = 'agendamiento_confirmacion_prof.html'
+
+class AgendamientoListProfView(ListView):
+    model = Agendamiento
+    template_name = 'agendamiento_list_prof.html'
+    context_object_name = 'agendamientosp'
+
+class AgendamientoDetailProfView(DetailView):
+    model = Agendamiento
+    template_name = 'agendamiento_detail_prof.html'
+    context_object_name = 'agendamientop'
+
+class AgendamientoUpdateProfView(UpdateView):
+    model = Agendamiento
+    form_class = AgendamientoForm
+    template_name = 'agendamiento_form_prof.html'
+    success_url = reverse_lazy('agendamiento_list_prof')
+
+class AgendamientoDeleteProfView(DeleteView):
+    model = Agendamiento
+    template_name = 'agendamiento_confirm_delete_prof.html'
+    success_url = reverse_lazy('agendamiento_list_prof')
+
+#Horario Atencion - Perfil Profesional
+
+class HorarioAtencionListProfView(ListView):
+    model = HorarioAtencion
+    template_name = 'horario_list_prof.html'
+    context_object_name = 'horarios_atencionp'
+
+    def get_queryset(self):
+        return HorarioAtencion.objects.filter(profesional__isnull=False)
+
+class HorarioAtencionDetailProfView(DetailView):
+    model = HorarioAtencion
+    template_name = 'horario_detail_prof.html'
+    context_object_name = 'horario_atencionp'
+
+# Horario de Atencion - Perfil Admin 
 class HorarioAtencionListView(ListView):
     model = HorarioAtencion
-    template_name = 'horario_list.html'
-    context_object_name = 'horarios_atencion'
+    template_name = 'horario_list_prof.html'
+    context_object_name = 'horarios_atencionp'
 
     def get_queryset(self):
         return HorarioAtencion.objects.filter(profesional__isnull=False)

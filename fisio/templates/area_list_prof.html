@@ -1,0 +1,30 @@
+{% extends 'dashboard_profesional.html' %}
+{% load static %}
+{% block title %}Áreas de Servicio{% endblock %}
+
+
+{% block content %}
+<h1>Áreas de Servicio</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nombre del Área</th>
+      <th>Descripción</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for area in areas %}
+    <tr>
+      <td>{{ areap.nombre }}</td>
+      <td>{{ areap.descripcion }}</td>
+      <td>
+        <a href="{% url 'area_detail_prof' area.pk %}" class="btn btn-info">Ver</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

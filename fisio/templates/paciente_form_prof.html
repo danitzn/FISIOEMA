@@ -1,0 +1,75 @@
+{% extends 'dashboard_profesional.html' %}
+{% load static %}
+
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Formulario de Paciente</h2>
+
+<form method="post" class="bg-white p-4 rounded-lg shadow-md">
+    {% csrf_token %}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="id_nrodocumento" class="form-label">Nro. de Documento</label>
+            {{ form.nrodocumento }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_nombre" class="form-label">Nombre</label>
+            {{ form.nombre }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_apellido" class="form-label">Apellido</label>
+            {{ form.apellido }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+            {{ form.fecha_nacimiento }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_celular" class="form-label">Celular</label>
+            {{ form.celular }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_sexo" class="form-label">Sexo</label>
+            {{ form.sexo }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_diagnostico_medico" class="form-label">Diagnóstico Médico</label>
+            {{ form.diagnostico_medico }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_medico_tratante" class="form-label">Médico Tratante</label>
+            {{ form.medico_tratante }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_direccion" class="form-label">Dirección</label>
+            {{ form.direccion }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_mail" class="form-label">Correo Electrónico</label>
+            {{ form.mail }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_responsable" class="form-label">Responsable (si es menor de edad)</label>
+            {{ form.responsable }}
+        </div>
+    </div>
+
+    <!-- Mostrar errores del formulario si los hay -->
+    {% if form.errors %}
+        <div class="alert alert-danger mt-4">
+            <strong>Errores en el formulario:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="mt-4 d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'paciente_list_prof' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}
