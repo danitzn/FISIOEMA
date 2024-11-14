@@ -1,0 +1,23 @@
+{% extends 'dashboard_paciente.html' %}
+{% load static %}
+
+{% block title %}Detalle del Profesional{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-primary">{{ object.nombre }} {{ object.apellidos }}</h2>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Fecha de Nacimiento:</strong> {{ object.fecha_nacimiento|date:"d/m/Y" }}</li>
+            <li class="list-group-item"><strong>Celular:</strong> {{ object.celular }}</li>
+            <li class="list-group-item"><strong>Correo:</strong> {{ object.correo }}</li>
+            <li class="list-group-item"><strong>Sexo:</strong> {{ object.sexo }}</li>
+            <li class="list-group-item"><strong>Tipo Profesional:</strong> {{ object.tipo_profesional }}</li>
+            <li class="list-group-item"><strong>Activo:</strong> {{ object.activo }}</li>
+        </ul>
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'profesional_list_paciente' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -87,7 +87,16 @@ class ServicioDeleteView(DeleteView):
     template_name = 'servicio_confirm_delete.html'
     success_url = reverse_lazy('servicio_list')
 
+# Servicio - Perfil Paciente
+class ServicioListPacView(ListView):
+    model = Servicio
+    template_name = 'servicio_list_paciente.html'
+    context_object_name = 'servicios'
 
+class ServicioDetailPacView(DetailView):
+    model = Servicio
+    template_name = 'servicio_detail_paciente.html'
+    context_object_name = 'servicio'
 
 # Paciente - Perfil Admin Views
 class PacienteListView(ListView):
@@ -134,6 +143,12 @@ class PacienteUpdateProfView(UpdateView):
     template_name = 'paciente_form_prof.html'
     success_url = reverse_lazy('paciente_list_prof')
 
+#Paciente - Perfil Paciente Views
+class PacienteDetailPacView(DetailView):
+    model = Paciente
+    template_name = 'paciente_detail_paciente.html'
+    context_object_name = 'pacientespac'
+
 # Profesional - PERFIL ADMIN Views
 class ProfesionalListView(ListView):
     model = Profesional
@@ -172,6 +187,17 @@ class ProfesionalDetailProfView(DetailView):
     model = Profesional
     template_name = 'profesional_detail_prof.html'
     context_object_name = 'profesionalp'
+
+# Profesional - PERFIL Paciente Views
+class ProfesionalListPacView(ListView):
+    model = Profesional
+    template_name = 'profesional_list_paciente.html'
+    context_object_name = 'profesionalespac'
+
+class ProfesionalDetailPacView(DetailView):
+    model = Profesional
+    template_name = 'profesional_detail_paciente.html'
+    context_object_name = 'profesionalpac'
 
 #perfiles de usuario def
 
@@ -406,7 +432,6 @@ class AgendamientoDeleteProfView(DeleteView):
     success_url = reverse_lazy('agendamiento_list_prof')
 
 #Horario Atencion - Perfil Profesional
-
 class HorarioAtencionListProfView(ListView):
     model = HorarioAtencion
     template_name = 'horario_list_prof.html'
@@ -420,10 +445,24 @@ class HorarioAtencionDetailProfView(DetailView):
     template_name = 'horario_detail_prof.html'
     context_object_name = 'horario_atencionp'
 
+#Horario Atencion - Perfil Paciente
+class HorarioAtencionListPacView(ListView):
+    model = HorarioAtencion
+    template_name = 'horario_list_paciente.html'
+    context_object_name = 'horarios_atencion'
+
+    def get_queryset(self):
+        return HorarioAtencion.objects.filter(profesional__isnull=False)
+
+class HorarioAtencionDetailPacView(DetailView):
+    model = HorarioAtencion
+    template_name = 'horario_detail_paciente.html'
+    context_object_name = 'horario_atencion'
+
 # Horario de Atencion - Perfil Admin 
 class HorarioAtencionListView(ListView):
     model = HorarioAtencion
-    template_name = 'horario_list_prof.html'
+    template_name = 'horario_list.html'
     context_object_name = 'horarios_atencionp'
 
     def get_queryset(self):
