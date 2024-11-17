@@ -1,0 +1,30 @@
+{% extends 'dashboard_profesional.html' %}
+{% load static %}
+{% block title %}Lista de Profesionales{% endblock %}
+
+{% block content %}
+<h1>Lista de Profesionales</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Apellidos</th>
+      <th>Especialidad</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for profesional in object_list %}
+    <tr>
+      <td>{{ profesional.nombre }}</td>
+      <td>{{ profesional.apellidos }}</td>
+      <td>{{ profesional.especialidad }}</td>
+      <td>
+        <a href="{% url 'profesional_detail_prof' profesional.pk %}" class="btn btn-info">Ver</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
