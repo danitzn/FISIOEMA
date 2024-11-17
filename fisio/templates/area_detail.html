@@ -1,0 +1,20 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block title %}Detalle del Area{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-primary">Detalle del Area</h2>
+        <p><strong>Nombre:</strong> {{ area.nombre }}</p>
+        <p><strong>Descripción:</strong> {{ area.descripcion }}</p>
+
+        <div class="button-container d-flex justify-content-between mt-4">
+            <a href="{% url 'area_update' area.id %}" class="btn btn-primary">Editar</a>
+            <a href="{% url 'area_confirm_delete' area.id %}" class="btn btn-danger">Eliminar</a>
+            <a href="{% url 'area_list' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

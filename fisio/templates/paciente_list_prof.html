@@ -1,0 +1,33 @@
+{% extends 'dashboard_profesional.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>Lista de Pacientes</h1>
+
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Fecha de Nacimiento</th>
+            <th scope="col">Número de Documento</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for paciente in pacientes %}
+                <tr>
+                  <td>{{ pacientep.nombre }}</td>
+                  <td>{{ pacientep.apellido }}</td>
+                  <td>{{ pacientep.fecha_nacimiento|date:"d/m/Y" }}</td>
+                  <td>{{ pacientep.nrodocumento }}</td>
+                  <td>
+                    <a href="{% url 'paciente_detail_prof' paciente.pk %}" class="btn btn-info">Ver</a>
+                    <a href="{% url 'paciente_update_prof' paciente.pk %}" class="btn btn-warning">Editar</a>
+                  </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
