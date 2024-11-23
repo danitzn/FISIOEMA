@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Servicio
+from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Servicio, Sesiones, SesionDetalle
 from django.contrib.auth.models import User
 from .models import Perfil
 from django.core.validators import validate_email
@@ -117,4 +117,21 @@ class HorarioForm (forms.ModelForm):
             'hora_fin': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'idturno': forms.Select(attrs={'class': 'form-control'}),
             'servicio': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+class SesionesForm(forms.ModelForm):
+    class Meta:
+        model = Sesiones
+        fields = ['nombre', 'fecha_inicio', 'cantidad_sesiones', 'cantidad_realizadas', 'finalizado']
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class SesionDetalleForm(forms.ModelForm):
+    class Meta:
+        model = SesionDetalle
+        fields = ['numero_sesion', 'fecha', 'hora', 'observaciones', 'estado', 'estado_pago']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'hora': forms.TimeInput(attrs={'type': 'time'}),
         }

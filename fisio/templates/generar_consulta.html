@@ -19,11 +19,33 @@
             <label for="diagnostico" class="form-label">Diagnóstico</label>
             <textarea id="diagnostico" name="diagnostico" class="form-control" required></textarea>
         </div>
+        <div class="mb-3">
+            <label for="tiene_sesiones" class="form-label">¿Tiene sesiones?</label>
+            <input type="checkbox" id="tiene_sesiones" name="tiene_sesiones">
+        </div>
+
+        <!-- Sección para crear sesiones -->
+        <div id="sesiones_form_section" style="display: none;">
+            <h3 class="text-xl font-semibold mt-4">Detalles de Sesiones</h3>
+            {{ sesiones_form.as_p }}
+        </div>
+
         <button type="submit" class="btn btn-primary">Guardar Consulta</button>
     </form>
     <a href="{% url 'calendario_admin' %}" class="btn btn-secondary mt-3">Volver al Calendario</a>
 
     <script>
+        // Mostrar/ocultar el formulario de sesiones según el checkbox
+        document.getElementById('tiene_sesiones').addEventListener('change', function() {
+            const sesionesFormSection = document.getElementById('sesiones_form_section');
+            if (this.checked) {
+                sesionesFormSection.style.display = 'block';
+            } else {
+                sesionesFormSection.style.display = 'none';
+            }
+        });
+
+        // Predefinir la fecha actual para el campo de fecha de consulta
         document.addEventListener('DOMContentLoaded', function() {
             var now = new Date();
             var year = now.getFullYear();
