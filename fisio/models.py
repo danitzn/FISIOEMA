@@ -388,7 +388,7 @@ class Consulta(models.Model):
         ('P', 'Pendiente'),
         ('PP', 'Pago Parcial'),
     ]
-    estado = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
+    estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
     fecha = models.DateField()
@@ -396,19 +396,37 @@ class Consulta(models.Model):
     hora = models.TimeField()
     motivo_consulta = models.TextField()
     diagnostico = models.TextField()
+    tiene_sesiones = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"Consulta de {self.paciente} con {self.profesional} el {self.fecha} a las {self.hora}"
 
-class Tratamiento(models.Model):
+class Sesiones (models.Model):
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     consulta = models.ForeignKey(Consulta, on_delete=models.CASCADE)
-    descripcion = models.TextField()
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=50)
     fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-
-    def __str__(self):
-        return f"Tratamiento de {self.consulta.paciente} - {self.fecha_inicio} al {self.fecha_fin}"
+    cantidad_sesiones = models.IntegerField()
+    cantidad_realizadas = models.IntegerField(default =0)
+    finalizado = models.BooleanField(default=False)
     
+
+
+class SesionDetalle (models.Model):
+    sesion = models.ForeignKey(Sesiones, on_delete=models.CASCADE)
+    numero_sesion = models.IntegerField()
+    fecha = models.DateField(default = date.today)
+    hora = models.TimeField(default = time)
+    observaciones = models.TextField()
+    estado = models.CharField(max_length=20, choices=[('A', 'Asistido'), ('N', 'No Asistido')])
+    estado_pago = models.CharField(max_length=20, choices=[
+        ('C', 'Cancelado'),
+        ('P', 'Pendiente'),
+        ('PP', 'Pago Parcial'),
+    ])
+
 
 class FlujoCaja(models.Model):
     persona = models.CharField(max_length=20, null=True, blank=True)  # CI de paciente, profesional, o ninguno

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Paciente, Profesional, Servicio, Area
-from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm
+from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionesForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -555,27 +555,79 @@ class FlujoCajaListView(ListView):
 
 
 
+# def generar_consulta(request, agendamiento_id):
+#     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
+#     if agendamiento.estado == 'en_curso':
+#         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
+#     if request.method == 'POST':
+#         motivo_consulta = request.POST.get('motivo_consulta')
+#         diagnostico = request.POST.get('diagnostico')
+#         fecha_consulta = request.POST.get('fecha_consulta')
+#         Consulta.objects.create(
+#             paciente=agendamiento.paciente,
+#             profesional=agendamiento.profesional,
+#             fecha=fecha_consulta,
+#             servicio=agendamiento.servicio,
+#             hora=agendamiento.hora,
+#             motivo_consulta=motivo_consulta,
+#             diagnostico=diagnostico
+#         )
+#         agendamiento.estado = 'finalizado'
+#         agendamiento.save()
+#         return redirect('calendario_admin')
+#     return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+
+
+
 def generar_consulta(request, agendamiento_id):
     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
     if agendamiento.estado == 'en_curso':
         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
+
+    sesiones_form = None
     if request.method == 'POST':
         motivo_consulta = request.POST.get('motivo_consulta')
         diagnostico = request.POST.get('diagnostico')
         fecha_consulta = request.POST.get('fecha_consulta')
-        Consulta.objects.create(
+        tiene_sesiones = request.POST.get('tiene_sesiones') == 'on'
+
+        # Crear consulta
+        nueva_consulta = Consulta.objects.create(
             paciente=agendamiento.paciente,
             profesional=agendamiento.profesional,
             fecha=fecha_consulta,
             servicio=agendamiento.servicio,
             hora=agendamiento.hora,
             motivo_consulta=motivo_consulta,
-            diagnostico=diagnostico
+            diagnostico=diagnostico,
+            tiene_sesiones=tiene_sesiones
         )
+
+        # Si tiene sesiones, manejar el formulario de sesiones
+        if tiene_sesiones:
+            sesiones_form = SesionesForm(request.POST)
+            if sesiones_form.is_valid():
+                nueva_sesion = sesiones_form.save(commit=False)
+                nueva_sesion.paciente = nueva_consulta.paciente
+                nueva_sesion.consulta = nueva_consulta
+                nueva_sesion.servicio = nueva_consulta.servicio
+                nueva_sesion.save()
+
+        # Actualizar estado del agendamiento
         agendamiento.estado = 'finalizado'
         agendamiento.save()
+
         return redirect('calendario_admin')
-    return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+
+    # Inicializar el formulario de sesiones solo si es necesario
+    if not sesiones_form:
+        sesiones_form = SesionesForm()
+
+    return render(request, 'generar_consulta.html', {
+        'agendamiento': agendamiento,
+        'sesiones_form': sesiones_form
+    })
+
 
 
 def buscar_consultas_por_ci(request):
