@@ -6,7 +6,7 @@ from fisio.views import (
     AgendamientoCreateProfView, AgendamientoCreateView, AgendamientoDeleteProfView, AgendamientoDeleteView, AgendamientoDetailProfView, AgendamientoDetailView, AgendamientoListProfView, AgendamientoListView, AgendamientoUpdateProfView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailProfView, AreaDetailView, AreaListProfView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoProfView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailPacView, HorarioAtencionDetailProfView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListPacView, HorarioAtencionListProfView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteDetailPacView, PacienteDetailProfView, PacienteListProfView, PacienteListView, PacienteDetailView, PacienteCreateView, PacienteUpdateProfView,
     PacienteUpdateView, PacienteDeleteView, ProfesionalDetailPacView, ProfesionalDetailProfView, ProfesionalListPacView, ProfesionalListProfView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView, 
-    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home,registro,login_view, calendario
+    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home,registro,login_view, calendario, reporte_consultas
 )
 
 urlpatterns = [
@@ -101,6 +101,7 @@ urlpatterns = [
     # Usuario URLs
     path('admin/', admin.site.urls, name='admin'),
     path('registro/', registro, name='registro'),
+
     # path('login/', login_view, name='login'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('', home, name='home'),  # Página de inicio (login)
@@ -112,6 +113,9 @@ urlpatterns = [
     path("cobrar-consulta/<int:consulta_id>/", cobrar_consulta, name="cobrar_consulta"),
     path("cobrar-consulta/<int:consulta_id>/", cobrar_consulta, name="cobrar_consulta"),
     path('flujo_caja_list/', FlujoCajaListView.as_view(), name='flujo_caja_list'),
+
+    #reportes
+    path('reporte_consultas/', reporte_consultas, name='reporte_consultas'),
     
     
 ]
