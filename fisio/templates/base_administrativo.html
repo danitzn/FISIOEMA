@@ -111,13 +111,13 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#historiasClinicas" aria-expanded="false" aria-controls="historiasClinicas">
-                                        <span class="icon">🩺</span> Historias Clínicas
+                                        <span class="icon">🩺</span> Reportes Clínicos
                                     </button>
                                 </h2>
                                 <div id="historiasClinicas" class="accordion-collapse collapse" data-bs-parent="#historiasClinicasAccordion">
                                     <div class="accordion-body p-0">
                                         <ul class="list-unstyled m-0">
-                                            <li><a href="" class="d-block px-3 py-2">Consultas</a></li>
+                                            <li><a href="{% url 'reporte_consultas' %}" class="d-block px-3 py-2">Consultas atendidas</a></li>
                                             <li><a href="" class="d-block px-3 py-2">Pacientes</a></li>
                                         </ul>
                                     </div>

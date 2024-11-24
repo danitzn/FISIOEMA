@@ -1,0 +1,62 @@
+{% extends 'base_administrativo.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Consultas</title>
+    <style>
+        .container {
+            max-width: 80%; /* Ajusta este valor según tus necesidades */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Reporte de Consultas</h2>
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="start_date">Desde</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="end_date">Hasta</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                </div>
+                <div class="col-md-4 mt-4">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre del Paciente</th>
+                    <th>Motivo de la Consulta</th>
+                    <th>Diagnóstico</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consulta in consultas %}
+                    <tr>
+                        <td>{{ consulta.paciente.nombre }} {{ consulta.paciente.apellido }}</td>
+                        <td>{{ consulta.motivo_consulta }}</td>
+                        <td>{{ consulta.diagnostico }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mt-3">
+            <a href="?export_pdf=1&start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-danger">Exportar PDF</a>
+            <a href="?export_excel=1&start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success">Exportar Excel</a>
+        </div>
+    </div>
+</body>
+</html>
+
+{% endblock %}

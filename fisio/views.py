@@ -1,5 +1,6 @@
 # views.py
 import json
+from django.http import HttpResponse
 from django.utils import timezone  
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,7 +14,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.decorators.csrf import requires_csrf_token
 from django.db.models import Sum
-
+from reportlab.pdfgen import canvas
+import csv
 
 #logoutViews
 def logout_view(request):
@@ -501,7 +503,7 @@ def calendario(request):
     for agendamiento in agendamientos:
         # Combinar fecha y hora en un objeto datetime
         start_datetime = datetime.combine(agendamiento.fecha, agendamiento.hora)
-
+    
         # Calcular la hora de finalización (por ejemplo, 1 hora después del inicio)
         end_datetime = start_datetime + timedelta(hours=1)
 
@@ -554,28 +556,6 @@ class FlujoCajaListView(ListView):
         return context
 
 
-
-# def generar_consulta(request, agendamiento_id):
-#     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
-#     if agendamiento.estado == 'en_curso':
-#         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
-#     if request.method == 'POST':
-#         motivo_consulta = request.POST.get('motivo_consulta')
-#         diagnostico = request.POST.get('diagnostico')
-#         fecha_consulta = request.POST.get('fecha_consulta')
-#         Consulta.objects.create(
-#             paciente=agendamiento.paciente,
-#             profesional=agendamiento.profesional,
-#             fecha=fecha_consulta,
-#             servicio=agendamiento.servicio,
-#             hora=agendamiento.hora,
-#             motivo_consulta=motivo_consulta,
-#             diagnostico=diagnostico
-#         )
-#         agendamiento.estado = 'finalizado'
-#         agendamiento.save()
-#         return redirect('calendario_admin')
-#     return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
 
 
 
@@ -664,3 +644,68 @@ def cobrar_consulta(request, consulta_id):
 
     return render(request, "cobrar_consulta.html", {"consulta": consulta})
 
+
+
+#reportes
+def reporte_consultas(request):
+    # Obtener parámetros del filtro de fecha
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    # Filtrar consultas por rango de fecha si se proporcionan fechas
+    consultas = Consulta.objects.all()
+    if start_date and end_date:
+        consultas = consultas.filter(fecha__range=[start_date, end_date])
+    
+    # Renderizar la página HTML
+    if 'export_pdf' in request.GET:
+        return exportar_pdf(consultas)
+
+    if 'export_excel' in request.GET:
+        return exportar_excel(consultas)
+
+    return render(request, 'resumen.html', {
+        'consultas': consultas,
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+# Función para generar el PDF
+def exportar_pdf(consultas):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_consultas.pdf"'
+
+    c = canvas.Canvas(response)
+    c.drawString(100, 800, "Reporte de Consultas")
+    y = 750
+    c.drawString(50, y, "Nombre de Paciente")
+    c.drawString(250, y, "Motivo de la Consulta")
+    c.drawString(450, y, "Diagnóstico")
+    y -= 30
+
+    for consulta in consultas:
+        c.drawString(50, y, f"{consulta.paciente.nombre} {consulta.paciente.apellido}")
+        c.drawString(250, y, consulta.motivo_consulta[:50])  # Limitar texto
+        c.drawString(450, y, consulta.diagnostico[:50])  # Limitar texto
+        y -= 30
+
+    c.showPage()
+    c.save()
+    return response
+
+# Función para generar Excel
+def exportar_excel(consultas):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="reporte_consultas.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Nombre de Paciente', 'Motivo de la Consulta', 'Diagnóstico'])
+
+    for consulta in consultas:
+        writer.writerow([
+            f"{consulta.paciente.nombre} {consulta.paciente.apellido}",
+            consulta.motivo_consulta,
+            consulta.diagnostico
+        ])
+
+    return response
