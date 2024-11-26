@@ -1,41 +1,67 @@
 {% extends 'base_administrativo.html' %}
 
 {% block content %}
-    <h1>Calendario de Pacientes</h1>
-    <div id="calendar"></div>
-    <div id="mensaje" style="display: none; color: red; margin-top: 20px;"></div>
-    <!-- Moment.js, jQuery, and FullCalendar CSS/JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Parseamos la variable eventos_json para obtener la lista de eventos
-            var eventos = JSON.parse('{{ eventos_json|safe }}');
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
-                },
-                locale: 'es',  // Configuración del idioma en español
-                events: eventos,  // Cargamos los eventos desde la variable eventos
-                editable: false,
-                displayEventTime: true,  // Mostrar la hora de los eventos
-                eventRender: function(event, element) {
-                    if (event.estado === 'en_curso') {
-                        element.css('background-color', '#28a745');  // Verde claro
-                        element.css('border-color', '#28a745');
-                        element.on('click', function() {
-                            $('#mensaje').text('Ya se agendó la consulta.').show();
-                        });
-                    } else if (event.estado === 'finalizado') {
-                        element.css('background-color', '#17a2b8');  // Azul claro
-                        element.css('border-color', '#17a2b8');
+<h1>Calendario de Pacientes</h1>
+<div id="calendar"></div>
+<div id="mensaje" style="display: none; color: red; margin-top: 20px;"></div>
+
+<!-- Moment.js, jQuery, and FullCalendar CSS/JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var eventos = JSON.parse('{{ eventos_json|safe }}');
+        
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            locale: 'es', // Configuración del idioma en español
+            events: eventos, // Cargamos los eventos desde la variable eventos
+            editable: false,
+            displayEventTime: true, // Mostrar la hora de los eventos
+            eventRender: function (event, element) {
+                // Determinamos los colores según el tipo
+                if (event.estado === 'en_curso') {
+                    element.css('background-color', '#28a745'); // Verde claro
+                    element.css('border-color', '#28a745');
+                    element.on('click', function () {
+                        $('#mensaje').text('Ya se agendó la consulta.').show();
+                    });
+                } else if (event.estado === 'finalizado') {
+                    element.css('background-color', '#17a2b8'); // Azul claro
+                    element.css('border-color', '#17a2b8');
+                } else if (event.tipo === 'E') { // Evaluación
+                    element.css('background-color', '#FF0000'); // Rojo
+                    element.css('border-color', '#FF0000');
+                } else if (event.tipo === 'S') { // Sesión
+                    element.css('background-color', '#D4A017'); // Mostaza oscuro
+                    element.css('border-color', '#D4A017');
+                } else if (event.tipo === 'I') { // Informe
+                    element.css('background-color', '#000000'); // Negro
+                    element.css('border-color', '#000000');
+                }
+            },
+            eventClick: function (event) {
+                if (event.estado === 'en_curso') {
+                    $('#mensaje').text('Ya se agendó la consulta.').show();
+                } else {
+                    // Redirigir según el tipo
+                    if (event.tipo === 'E') {
+                        window.location.href = `/evaluacion/${event.id}`;
+                    } else if (event.tipo === 'S') {
+                        window.location.href = `/sesion/${event.id}`;
+                    } else if (event.tipo === 'I') {
+                        window.location.href = `/informe/${event.id}`;
                     }
                 }
-            });
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}

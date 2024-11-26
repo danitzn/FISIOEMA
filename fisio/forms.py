@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Servicio, Sesiones, SesionDetalle
+from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Servicio, Sesiones, SesionDetalle, Informe
 from django.contrib.auth.models import User
 from .models import Perfil
 from django.core.validators import validate_email
@@ -89,7 +89,7 @@ class PacienteForm(forms.ModelForm):
 class AgendamientoForm(forms.ModelForm):
     class Meta:
         model = Agendamiento
-        fields = ['paciente', 'fecha', 'hora', 'servicio', 'profesional']
+        fields = ['paciente', 'fecha', 'hora', 'servicio', 'profesional', 'tipo']
         
         widgets = {
             'paciente': forms.Select(attrs={'class': 'form-control'}),
@@ -97,6 +97,7 @@ class AgendamientoForm(forms.ModelForm):
             'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'servicio': forms.Select(attrs={'class': 'form-control'}),
             'profesional': forms.Select(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
             # 'estado': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
@@ -135,3 +136,9 @@ class SesionDetalleForm(forms.ModelForm):
             'fecha': forms.DateInput(attrs={'type': 'date'}),
             'hora': forms.TimeInput(attrs={'type': 'time'}),
         }
+
+class InformeForm(forms.ModelForm):
+    class Meta:
+        model = Informe
+        fields = ['paciente', 'profesional', 'fecha_informe', 'descripcion']
+

@@ -159,7 +159,12 @@ class Agendamiento(models.Model):
         ('en_curso', 'En Curso'),
         ('finalizado', 'Finalizado'),
     ]
-    
+    TIPO_CHOICES = [
+        ('E', 'Evaluación'),
+        ('S', 'Sesión'),
+        ('I', 'Informe'),
+    ]
+    tipo = models.CharField(max_length=1, choices=TIPO_CHOICES)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='agendamientos')
     fecha = models.DateField()
     hora = models.TimeField()
@@ -170,6 +175,9 @@ class Agendamiento(models.Model):
     def __str__(self):
         return f"{self.fecha} {self.hora} - {self.paciente} ({self.estado})"
     
+    # def __str__(self):
+    #     return f"{self.get_tipo_display()} - {self.fecha} ({self.estado})"
+
     def clean(self):
         # Validar si ya existe un agendamiento en el mismo horario para el mismo profesional y servicio.
         agendamientos_conflictivos = Agendamiento.objects.filter(
@@ -180,7 +188,7 @@ class Agendamiento(models.Model):
         ).exclude(id=self.id)  # Excluir el agendamiento actual si se está editando
 
         if agendamientos_conflictivos.exists():
-            raise ValidationError("Este turno ya está reservado para este profesional.")
+            raise ValidationError("Este turno ya está reservado para este profesional")
 
     def __str__(self):
         return f"{self.profesional} - {self.servicio} ({self.fecha} a las {self.hora})"
@@ -212,9 +220,14 @@ class HistoriaMedico(models.Model):
 class Informe(models.Model):
     fecha_informe = models.DateField()
     descripcion = models.TextField()
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
+    profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Informe del {self.fecha_informe}"
+        return f"Informe de {self.paciente} por {self.profesional} el {self.fecha_informe}"
+ 
+
+    
 
 class TipoInformeArea(models.Model):
     nombre = models.CharField(max_length=100)

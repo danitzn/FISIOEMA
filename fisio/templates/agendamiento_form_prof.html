@@ -2,53 +2,57 @@
 {% load static %}
 
 {% block content %}
-    <h2 class="mb-4">Agendar Turno</h2>
+<h2 class="mb-4">Agendar Turno</h2>
 
-    <form method="post" class="bg-white p-4 rounded-lg shadow-md">
-        {% csrf_token %}
-        
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="id_profesional" class="form-label">Profesional</label>
-                {{ form.profesional }}
-            </div>
-            <div class="col-md-6">
-                <label for="id_paciente" class="form-label">Paciente</label>
-                {{ form.paciente }}
-            </div>
+<form method="post" class="bg-white p-4 rounded-lg shadow-md">
+    {% csrf_token %}
+    
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="id_profesional" class="form-label">Profesional</label>
+            {{ form.profesional }}
         </div>
-
-        <div class="row g-3 mt-2">
-            <div class="col-md-6">
-                <label for="id_servicio" class="form-label">Servicio</label>
-                {{ form.servicio }}
-            </div>
-            <div class="col-md-6">
-                <label for="id_fecha" class="form-label">Fecha</label>
-                {{ form.fecha }}
-            </div>
+        <div class="col-md-6">
+            <label for="id_paciente" class="form-label">Paciente</label>
+            {{ form.paciente }}
         </div>
+    </div>
 
-        <div class="row g-3 mt-2">
-            <div class="col-md-6">
-                <label for="id_hora" class="form-label">Hora</label>
-                {{ form.hora }}
-            </div>
+    <div class="row g-3 mt-2">
+        <div class="col-md-6">
+            <label for="id_servicio" class="form-label">Servicio</label>
+            {{ form.servicio }}
         </div>
-
-        <div class="d-grid gap-2 mt-3">
-            <button type="submit" class="btn btn-primary">Agendar</button>
+        <div class="col-md-6">
+            <label for="id_fecha" class="form-label">Fecha</label>
+            {{ form.fecha }}
         </div>
+    </div>
 
-        <!-- Mostrar mensajes de error o informativos -->
-        {% if messages %}
-            <ul class="messages mt-3">
-                {% for message in messages %}
-                    <li {% if message.tags %} class="alert {{ message.tags }}" {% endif %}>
-                        {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </form>
+    <div class="row g-3 mt-2">
+        <div class="col-md-6">
+            <label for="id_hora" class="form-label">Hora</label>
+            {{ form.hora }}
+        </div>
+        <div class="col-md-6">
+            <label for="id_tipo" class="form-label">Tipo</label>
+            {{ form.tipo }}
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Agendar</button>
+    </div>
+
+    <!-- Mostrar mensajes de error o informativos -->
+    {% if messages %}
+        <ul class="messages mt-3">
+            {% for message in messages %}
+                <li {% if message.tags %} class="alert {{ message.tags }}" {% endif %}>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</form>
 {% endblock %}
