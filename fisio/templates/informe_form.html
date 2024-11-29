@@ -6,5 +6,7 @@
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Guardar Informe</button>
 </form>
-<a href="{% url 'generar_informe_pdf' informe.id %}" class="btn btn-danger">Generar PDF</a>
+{% if informe %}
+    <a href="{% url 'generar_informe_pdf' pk=informe.id %}">Generar PDF</a>
+{% endif %}
 {% endblock %}

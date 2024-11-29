@@ -2,11 +2,13 @@
 import json
 from django.http import HttpResponse
 from django.utils import timezone  
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Paciente, Profesional, Servicio, Area
+from reportlab.lib.utils import ImageReader
+from FISIOEMA import settings
+from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Servicio, Area
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
@@ -15,6 +17,8 @@ from django.contrib import messages
 from django.views.decorators.csrf import requires_csrf_token
 from django.db.models import Sum
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import os
 import csv
 
 #logoutViews
@@ -609,6 +613,101 @@ class FlujoCajaListView(ListView):
 
 
 #actualizado 
+# def generar_consulta(request, agendamiento_id):
+#     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
+
+#     # Verificar si el agendamiento está en curso
+#     if agendamiento.estado == 'en_curso':
+#         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
+
+#     if agendamiento.tipo == 'E':  # Evaluación
+#         if request.method == 'POST':
+#             motivo_consulta = request.POST.get('motivo_consulta')
+#             diagnostico = request.POST.get('diagnostico')
+#             fecha_consulta = request.POST.get('fecha_consulta')
+
+#             # Crear la consulta
+#             nueva_consulta = Consulta.objects.create(
+#                 paciente=agendamiento.paciente,
+#                 profesional=agendamiento.profesional,
+#                 fecha=fecha_consulta,
+#                 servicio=agendamiento.servicio,
+#                 hora=agendamiento.hora,
+#                 motivo_consulta=motivo_consulta,
+#                 diagnostico=diagnostico
+#             )
+
+#             # Actualizar estado del agendamiento
+#             agendamiento.estado = 'finalizado'
+#             agendamiento.save()
+
+#             return redirect('calendario_admin')
+
+#         return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+
+#     elif agendamiento.tipo == 'S':  # Sesión
+#         sesiones_form = None
+
+#         if request.method == 'POST':
+#             sesiones_form = SesionesForm(request.POST)
+#             if sesiones_form.is_valid():
+#                 nueva_sesion = sesiones_form.save(commit=False)
+#                 nueva_sesion.paciente = agendamiento.paciente
+#                 nueva_sesion.agendamiento = agendamiento
+#                 nueva_sesion.servicio = agendamiento.servicio
+#                 nueva_sesion.save()
+
+#                 # Incrementar sesiones realizadas
+#                 nueva_sesion.total_realizadas += 1
+#                 nueva_sesion.save()
+
+#                 # Actualizar estado del agendamiento
+#                 agendamiento.estado = 'finalizado'
+#                 agendamiento.save()
+
+#                 return redirect('calendario_admin')
+
+#         if not sesiones_form:
+#             sesiones_form = SesionesForm()
+
+#         return render(request, 'sesion_detalle.html', {
+#             'agendamiento': agendamiento,
+#             'sesiones_form': sesiones_form
+#         })
+
+#     elif agendamiento.tipo == 'I':  # Informe
+#         if request.method == 'POST':
+#             form = InformeForm(request.POST)
+#             if form.is_valid():
+#                 informe = form.save(commit=False)
+#                 informe.paciente = agendamiento.paciente
+#                 informe.profesional = agendamiento.profesional
+#                 informe.fecha = agendamiento.fecha
+#                 informe.save()
+
+#                 # Actualizar estado del agendamiento
+#                 agendamiento.estado = 'finalizado'
+#                 agendamiento.save()
+
+#                 return redirect('calendario_admin')
+
+#         else:
+#             form = InformeForm(initial={
+#                 'paciente': agendamiento.paciente,
+#                 'profesional': agendamiento.profesional,
+#                 'fecha': agendamiento.fecha
+#             })
+
+#         return render(request, 'informe_form.html', {
+#             'form': form,
+#             'agendamiento': agendamiento
+#         })
+
+#     # En caso de que no se reconozca el tipo
+#     return redirect('calendario_admin')
+#backup de 29 11 2024
+
+
 def generar_consulta(request, agendamiento_id):
     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
 
@@ -620,7 +719,7 @@ def generar_consulta(request, agendamiento_id):
         if request.method == 'POST':
             motivo_consulta = request.POST.get('motivo_consulta')
             diagnostico = request.POST.get('diagnostico')
-            fecha_consulta = request.POST.get('fecha_consulta')
+            fecha_consulta = request.POST.get('fecha_consulta', date.today())
 
             # Crear la consulta
             nueva_consulta = Consulta.objects.create(
@@ -642,29 +741,24 @@ def generar_consulta(request, agendamiento_id):
         return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
 
     elif agendamiento.tipo == 'S':  # Sesión
-        sesiones_form = None
+        sesiones_form = SesionesForm(request.POST or None)
 
-        if request.method == 'POST':
-            sesiones_form = SesionesForm(request.POST)
-            if sesiones_form.is_valid():
-                nueva_sesion = sesiones_form.save(commit=False)
-                nueva_sesion.paciente = agendamiento.paciente
-                nueva_sesion.agendamiento = agendamiento
-                nueva_sesion.servicio = agendamiento.servicio
-                nueva_sesion.save()
+        if request.method == 'POST' and sesiones_form.is_valid():
+            nueva_sesion = sesiones_form.save(commit=False)
+            nueva_sesion.paciente = agendamiento.paciente
+            nueva_sesion.agendamiento = agendamiento
+            nueva_sesion.servicio = agendamiento.servicio
+            nueva_sesion.save()
 
-                # Incrementar sesiones realizadas
-                nueva_sesion.total_realizadas += 1
-                nueva_sesion.save()
+            # Incrementar sesiones realizadas
+            nueva_sesion.total_realizadas += 1
+            nueva_sesion.save()
 
-                # Actualizar estado del agendamiento
-                agendamiento.estado = 'finalizado'
-                agendamiento.save()
+            # Actualizar estado del agendamiento
+            agendamiento.estado = 'finalizado'
+            agendamiento.save()
 
-                return redirect('calendario_admin')
-
-        if not sesiones_form:
-            sesiones_form = SesionesForm()
+            return redirect('calendario_admin')
 
         return render(request, 'sesion_detalle.html', {
             'agendamiento': agendamiento,
@@ -672,37 +766,31 @@ def generar_consulta(request, agendamiento_id):
         })
 
     elif agendamiento.tipo == 'I':  # Informe
-        if request.method == 'POST':
-            form = InformeForm(request.POST)
-            if form.is_valid():
-                informe = form.save(commit=False)
-                informe.paciente = agendamiento.paciente
-                informe.profesional = agendamiento.profesional
-                informe.fecha = agendamiento.fecha
-                informe.save()
+        informe = None
+        form = InformeForm(request.POST or None, initial={
+        'paciente': agendamiento.paciente,
+        'profesional': agendamiento.profesional,
+        'fecha': date.today()
+    })
 
-                # Actualizar estado del agendamiento
-                agendamiento.estado = 'finalizado'
-                agendamiento.save()
+    if request.method == 'POST' and form.is_valid():
+        informe = form.save(commit=False)
+        informe.paciente = agendamiento.paciente
+        informe.profesional = agendamiento.profesional
+        informe.fecha = date.today()
+        informe.save()
 
-                return redirect('calendario_admin')
+        # Actualizar estado del agendamiento
+        agendamiento.estado = 'finalizado'
+        agendamiento.save()
 
-        else:
-            form = InformeForm(initial={
-                'paciente': agendamiento.paciente,
-                'profesional': agendamiento.profesional,
-                'fecha': agendamiento.fecha
-            })
+        return redirect('calendario_admin')
 
-        return render(request, 'informe_form.html', {
-            'form': form,
-            'agendamiento': agendamiento
-        })
-
-    # En caso de que no se reconozca el tipo
-    return redirect('calendario_admin')
-
-
+    return render(request, 'informe_form.html', {
+        'form': form,
+        'agendamiento': agendamiento,
+        'informe': informe  # Pasa el informe al contexto
+    })
 
 def buscar_consultas_por_ci(request):
     consultas = None
@@ -764,28 +852,61 @@ def reporte_consultas(request):
         'end_date': end_date
     })
 
-# Función para generar el PDF
+
+
 def exportar_pdf(consultas):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_consultas.pdf"'
 
-    c = canvas.Canvas(response)
-    c.drawString(100, 800, "Reporte de Consultas")
-    y = 750
+    c = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    # Ruta a la imagen de cabecera
+    imagen_path = f"{settings.BASE_DIR}/static/images/fisio1.jpg"  
+    pie_imagen_path = f"{settings.BASE_DIR}/static/images/fisio6.jpg"  
+
+    # Dibujar cabecera con imagen
+    if os.path.exists(imagen_path):  # Verifica si la imagen existe
+        c.drawImage(ImageReader(imagen_path), 50, height - 100, width=500, height=70)
+
+    # Título principal
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(50, height - 120, "Reporte de Consultas")
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 140, "Generado automáticamente por el sistema")
+
+    # Títulos de columnas
+    y = height - 180
     c.drawString(50, y, "Nombre de Paciente")
     c.drawString(250, y, "Motivo de la Consulta")
     c.drawString(450, y, "Diagnóstico")
+    c.line(50, y - 5, width - 50, y - 5)  # Línea divisoria
     y -= 30
 
+    # Agregar contenido de las consultas
     for consulta in consultas:
+        if y < 80:  # Si queda poco espacio, añade una nueva página
+            # Dibujar pie de página antes de cambiar de página
+            if os.path.exists(pie_imagen_path):
+                c.drawImage(ImageReader(pie_imagen_path), 50, 30, width=500, height=50)
+            c.showPage()
+            y = height - 100
         c.drawString(50, y, f"{consulta.paciente.nombre} {consulta.paciente.apellido}")
         c.drawString(250, y, consulta.motivo_consulta[:50])  # Limitar texto
         c.drawString(450, y, consulta.diagnostico[:50])  # Limitar texto
-        y -= 30
+        y -= 20
+
+    # Dibujar el pie de página en la última página
+    if os.path.exists(pie_imagen_path):
+        c.drawImage(ImageReader(pie_imagen_path), 50, 30, width=500, height=50)
+    else:
+        c.setFont("Helvetica", 10)
+        c.drawString(50, 30, "Reporte generado por el sistema - FISIOEMA")
 
     c.showPage()
     c.save()
     return response
+
 
 # Función para generar Excel
 def exportar_excel(consultas):
@@ -801,5 +922,41 @@ def exportar_excel(consultas):
             consulta.motivo_consulta,
             consulta.diagnostico
         ])
+
+    return response
+
+def generar_informe_pdf(request, pk):
+    informe = get_object_or_404(Informe, pk=pk)
+
+    # Crear el PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="informe_{pk}.pdf"'
+
+    # Configurar el canvas y el diseño
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    # Título
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(200, height - 50, f"Informe de {informe.paciente}")
+
+    # Línea divisoria
+    p.setStrokeColor(colors.grey)
+    p.line(50, height - 60, width - 50, height - 60)
+
+    # Detalles del informe
+    p.setFont("Helvetica", 12)
+    y = height - 100  # Posición inicial en Y
+    p.drawString(50, y, f"Profesional: {informe.profesional}")
+    y -= 20
+    p.drawString(50, y, f"Fecha del Informe: {informe.fecha_informe}")
+    y -= 20
+    p.drawString(50, y, "Descripción:")
+    y -= 20
+    p.drawString(70, y, informe.descripcion)
+
+    # Finalizar página
+    p.showPage()
+    p.save()
 
     return response

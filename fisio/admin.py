@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from fisio.models import Agendamiento, Area, Banco, Consulta, DatosFactura, Descuento, FlujoCaja, Paciente, Perfil, Profesional, Servicio, TipoDescuento, Transaccion, TipoProfesionalArea, HorarioAtencion, FlujoCaja
+from fisio.models import Agendamiento, Area, Banco, Consulta, DatosFactura, Descuento, FlujoCaja, Informe, Paciente, Perfil, Profesional, Servicio, TipoDescuento, Transaccion, TipoProfesionalArea, HorarioAtencion, FlujoCaja, Informe
 # Register your models here.
 admin.site.register(Paciente)
 admin.site.register(Profesional)
@@ -17,3 +17,4 @@ admin.site.register(Area)
 admin.site.register(HorarioAtencion)
 admin.site.register(Consulta)
 admin.site.register(FlujoCaja)
+admin.site.register(Informe)
