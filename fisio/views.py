@@ -1,6 +1,6 @@
 # views.py
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone  
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
-from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Servicio, Area
+from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Servicio, Area, Sesiones
 from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
@@ -18,6 +18,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.db.models import Sum
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from django.utils.timezone import now
 import os
 import csv
 
@@ -293,6 +294,7 @@ def home(request):
 
 # Agendamiento - Perfil Admin
 
+
 class AgendamientoCreateView(CreateView):
     model = Agendamiento
     form_class = AgendamientoForm
@@ -304,41 +306,33 @@ class AgendamientoCreateView(CreateView):
         servicio = form.cleaned_data['servicio']
         fecha = form.cleaned_data['fecha']
         hora = form.cleaned_data['hora']
+        tipo = form.cleaned_data['tipo']
+        referencia_sesion = form.cleaned_data.get('referencia_sesion')
 
-        # Validar que la fecha no sea anterior a hoy
-        if fecha < timezone.now().date():
-            messages.error(self.request, "No se puede cargar un agendamiento en una fecha pasada.")
-            return self.form_invalid(form)
+        # Validar tipo 'Sesión' con referencia_sesion
+        if tipo == 'S':
+            if not referencia_sesion:
+                messages.error(self.request, "Debe seleccionar una sesión de referencia para el tipo 'Sesión'.")
+                return self.form_invalid(form)
 
-        # Validar que el profesional tenga horario de atención
-        horario_profesional = HorarioAtencion.objects.filter(
-            profesional=profesional,
-            servicio=servicio,
-            fecha=fecha,
-            hora_inicio__lte=hora,
-            hora_fin__gte=hora
-        ).exists()
-        
-        if not horario_profesional:
-            messages.error(self.request, "El profesional no tiene horario de atención en esta especialidad y fecha.")
-            return self.form_invalid(form)
+            sesion = Sesiones.validar_sesion(
+                referencia_sesion=referencia_sesion,
+                paciente=form.cleaned_data['paciente'],
+                servicio=servicio
+            )
+            if not sesion:
+                messages.error(self.request, "La sesión de referencia no es válida o ya finalizó.")
+                return self.form_invalid(form)
 
-        # Validar conflictos de agendamiento
-        conflicto = Agendamiento.objects.filter(
-            profesional=profesional,
-            servicio=servicio,
-            fecha=fecha,
-            hora=hora
-        ).exists()
+            form.instance.referencia_sesion = referencia_sesion
+        else:
+            form.instance.referencia_sesion = None
 
-        if conflicto:
-            messages.error(self.request, "Ya existe un turno reservado para este profesional a esa hora.")
-            return self.form_invalid(form)
-
-        # Si no hay conflictos, guardar el agendamiento con estado 'Pendiente de Confirmación'
-        form.instance.estado = 'Pendiente de Confirmación'
+        # Resto de la lógica
+        form.instance.estado = 'pendiente'
         messages.success(self.request, "Agendamiento creado exitosamente.")
         return super().form_valid(form)
+
 
 class ConfirmacionAgendamientoView(TemplateView):
     template_name = 'agendamiento_confirmacion.html'
@@ -960,3 +954,14 @@ def generar_informe_pdf(request, pk):
     p.save()
 
     return response
+
+#generar sesiones
+def obtener_sesiones(request):
+        paciente_id = request.GET.get('paciente')
+        servicio_id = request.GET.get('servicio')
+        sesiones = Sesiones.objects.filter(
+            paciente_id=paciente_id,
+            servicio_id=servicio_id,
+            finalizado=False
+        ).values('id', 'nombre')  # Ajusta según los campos que necesites
+        return JsonResponse(list(sesiones), safe=False)

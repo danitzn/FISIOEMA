@@ -40,6 +40,13 @@
         </div>
     </div>
 
+    <div class="row g-3 mt-2">
+        <div class="col-md-6">
+            <label for="id_referencia_sesion" class="form-label">Referencia Sesión</label>
+            {{ form.referencia_sesion }}
+        </div>
+    </div>
+
     <div class="d-grid gap-2 mt-3">
         <button type="submit" class="btn btn-primary">Agendar</button>
     </div>
@@ -55,4 +62,33 @@
         </ul>
     {% endif %}
 </form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const pacienteField = document.getElementById('id_paciente');
+        const servicioField = document.getElementById('id_servicio');
+        const referenciaSesionField = document.getElementById('id_referencia_sesion');
+
+        async function actualizarSesiones() {
+            const paciente = pacienteField.value;
+            const servicio = servicioField.value;
+
+            if (paciente && servicio) {
+                const response = await fetch(`/obtener_sesiones/?paciente=${paciente}&servicio=${servicio}`);
+                const sesiones = await response.json();
+
+                referenciaSesionField.innerHTML = '<option value="">---------</option>';
+                sesiones.forEach(sesion => {
+                    const option = document.createElement('option');
+                    option.value = sesion.id;
+                    option.textContent = sesion.nombre;
+                    referenciaSesionField.appendChild(option);
+                });
+            }
+        }
+
+        pacienteField.addEventListener('change', actualizarSesiones);
+        servicioField.addEventListener('change', actualizarSesiones);
+    });
+</script>
 {% endblock %}

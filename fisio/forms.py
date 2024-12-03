@@ -89,7 +89,7 @@ class PacienteForm(forms.ModelForm):
 class AgendamientoForm(forms.ModelForm):
     class Meta:
         model = Agendamiento
-        fields = ['paciente', 'fecha', 'hora', 'servicio', 'profesional', 'tipo']
+        fields = ['paciente', 'fecha', 'hora', 'servicio', 'profesional', 'tipo', 'referencia_sesion']
         
         widgets = {
             'paciente': forms.Select(attrs={'class': 'form-control'}),
@@ -98,7 +98,7 @@ class AgendamientoForm(forms.ModelForm):
             'servicio': forms.Select(attrs={'class': 'form-control'}),
             'profesional': forms.Select(attrs={'class': 'form-control'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
-            # 'estado': forms.TextInput(attrs={'class': 'form-control'}),
+            'referencia_sesion': forms.Select(attrs={'class': 'form-control'}),
         }
 
 

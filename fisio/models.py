@@ -171,27 +171,31 @@ class Agendamiento(models.Model):
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='agendamientos')
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE, related_name='agendamientos')
     estado = models.CharField(max_length=30, choices=ESTADOS, default='pendiente')
-
-    def __str__(self):
-        return f"{self.fecha} {self.hora} - {self.paciente} ({self.estado})"
-    
-    # def __str__(self):
-    #     return f"{self.get_tipo_display()} - {self.fecha} ({self.estado})"
+    referencia_sesion = models.IntegerField(null=True, blank=True)
 
     def clean(self):
-        # Validar si ya existe un agendamiento en el mismo horario para el mismo profesional y servicio.
         agendamientos_conflictivos = Agendamiento.objects.filter(
             profesional=self.profesional,
             servicio=self.servicio,
             fecha=self.fecha,
             hora=self.hora
-        ).exclude(id=self.id)  # Excluir el agendamiento actual si se está editando
+        ).exclude(id=self.id)
 
         if agendamientos_conflictivos.exists():
-            raise ValidationError("Este turno ya está reservado para este profesional")
+            raise ValidationError("Este turno ya está reservado para este profesional.")
 
-    def __str__(self):
-        return f"{self.profesional} - {self.servicio} ({self.fecha} a las {self.hora})"
+        # Validar referencia_sesion
+        if self.tipo == 'S' and self.referencia_sesion:
+            sesion = Sesiones.validar_sesion(
+                referencia_sesion=self.referencia_sesion,
+                paciente=self.paciente,
+                servicio=self.servicio
+            )
+            if sesion is None:  # Manejar el caso donde no haya una sesión válida
+                raise ValidationError("No existe sesión válida. Debe cargar primero una evaluación.")
+
+
+
 
 class Evaluacion(models.Model):
     agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='evaluaciones')
@@ -200,13 +204,6 @@ class Evaluacion(models.Model):
     def __str__(self):
         return f"Evaluación de {self.agendamiento}"
 
-class Session(models.Model):
-    agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='sessions')
-    fecha = models.DateField()
-    evolucion = models.CharField(max_length=200)
-
-    def __str__(self):
-        return f"Sesión del {self.fecha} - {self.agendamiento.paciente}"
 
 class HistoriaMedico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='historias_medicas')
@@ -243,10 +240,6 @@ class TipoProfesionalArea(models.Model):
     def __str__(self):
         return self.nombre
 
-# class Tarifa(models.Model):
-#     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
-#     nombre = models.CharField(max_length=50)
-#     monto = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.nombre
@@ -424,6 +417,18 @@ class Sesiones (models.Model):
     cantidad_sesiones = models.IntegerField()
     cantidad_realizadas = models.IntegerField(default =0)
     finalizado = models.BooleanField(default=False)
+
+@staticmethod
+def validar_sesion(referencia_sesion, paciente, servicio):
+    """
+    Valida si existe una sesión activa para un paciente y servicio específicos.
+    """
+    return Sesiones.objects.filter(
+        id=referencia_sesion,
+        paciente=paciente,
+        servicio=servicio,
+        finalizado=False
+    ).first()  # Devuelve None si no hay resultados
     
 
 
