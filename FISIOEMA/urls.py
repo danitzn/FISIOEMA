@@ -6,7 +6,7 @@ from fisio.views import (
     AgendamientoCreateProfView, AgendamientoCreateView, AgendamientoDeleteProfView, AgendamientoDeleteView, AgendamientoDetailProfView, AgendamientoDetailView, AgendamientoListProfView, AgendamientoListView, AgendamientoUpdateProfView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailProfView, AreaDetailView, AreaListProfView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoProfView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailPacView, HorarioAtencionDetailProfView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListPacView, HorarioAtencionListProfView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteDetailPacView, PacienteDetailProfView, PacienteListProfView, PacienteListView, PacienteDetailView, PacienteCreateView, PacienteUpdateProfView,
     PacienteUpdateView, PacienteDeleteView, ProfesionalDetailPacView, ProfesionalDetailProfView, ProfesionalListPacView, ProfesionalListProfView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView, 
-    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
+    ProfesionalUpdateView, ProfesionalDeleteView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home, obtener_sesiones,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
 )
 
 urlpatterns = [
@@ -117,6 +117,9 @@ urlpatterns = [
     #reportes
     path('reporte_consultas/', reporte_consultas, name='reporte_consultas'),
     path('generar_informe_pdf/<int:pk>/', generar_informe_pdf, name='generar_informe_pdf'),
+
+    #procesos
+     path('obtener_sesiones/', obtener_sesiones, name='obtener_sesiones'),
     
     
 ]

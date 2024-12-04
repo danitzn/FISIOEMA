@@ -408,30 +408,40 @@ class Consulta(models.Model):
     def __str__(self):
         return f"Consulta de {self.paciente} con {self.profesional} el {self.fecha} a las {self.hora}"
 
-class Sesiones (models.Model):
+class Sesiones(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     consulta = models.ForeignKey(Consulta, on_delete=models.CASCADE)
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=50)
     fecha_inicio = models.DateField()
     cantidad_sesiones = models.IntegerField()
-    cantidad_realizadas = models.IntegerField(default =0)
+    cantidad_realizadas = models.IntegerField(default=0)
     finalizado = models.BooleanField(default=False)
 
-@staticmethod
-def validar_sesion(referencia_sesion, paciente, servicio):
-    """
-    Valida si existe una sesión activa para un paciente y servicio específicos.
-    """
-    return Sesiones.objects.filter(
-        id=referencia_sesion,
-        paciente=paciente,
-        servicio=servicio,
-        finalizado=False
-    ).first()  # Devuelve None si no hay resultados
-    
+    def save(self, *args, **kwargs):
+        # Validación: cantidad_realizadas no puede exceder cantidad_sesiones
+        if self.cantidad_realizadas > self.cantidad_sesiones:
+            raise ValueError("La cantidad de sesiones realizadas no puede exceder el total de sesiones.")
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def validar_sesion(cls, referencia_sesion, paciente, servicio):
+        """
+        Valida si existe una sesión activa para un paciente y servicio específicos.
+        """
+        try:
+            sesion = cls.objects.get(
+                id=referencia_sesion,
+                paciente=paciente,
+                servicio=servicio,
+                finalizado=False
+            )
+            return sesion  # Devuelve la sesión si es válida
+        except cls.DoesNotExist:
+            return None  # No se encontró una sesión válida
 
 
+       
 class SesionDetalle (models.Model):
     sesion = models.ForeignKey(Sesiones, on_delete=models.CASCADE)
     numero_sesion = models.IntegerField()

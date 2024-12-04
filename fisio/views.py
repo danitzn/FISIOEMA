@@ -1,10 +1,10 @@
 # views.py
 import json
+import os
+import csv
 from django.http import HttpResponse, JsonResponse
-from django.utils import timezone  
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
@@ -19,8 +19,8 @@ from django.db.models import Sum
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
-import os
-import csv
+from django.utils import timezone 
+from django.urls import reverse_lazy
 
 #logoutViews
 def logout_view(request):
@@ -491,37 +491,6 @@ class HorarioAtencionDeleteView(DeleteView):
     success_url = reverse_lazy('horario_list')
 
 
-# #calendario
-# def calendario(request):
-#     # Obtenemos todos los agendamientos desde el modelo
-#     agendamientos = Agendamiento.objects.all()
-
-#     # Convertimos los agendamientos a una lista de diccionarios con el formato adecuado
-#     eventos = []
-#     for agendamiento in agendamientos:
-#         # Combinar fecha y hora en un objeto datetime
-#         start_datetime = datetime.combine(agendamiento.fecha, agendamiento.hora)
-    
-#         # Calcular la hora de finalización (por ejemplo, 1 hora después del inicio)
-#         end_datetime = start_datetime + timedelta(hours=1)
-
-#         # Formateamos la información del evento para FullCalendar
-#         eventos.append({
-#             "title": f"{agendamiento.paciente.nombre} - {agendamiento.servicio.nombre}",
-#             "start": start_datetime.isoformat(),  # Formato ISO
-#             "end": end_datetime.isoformat(),      # Formato ISO
-#             "url": request.build_absolute_uri(f"/generar_consulta/{agendamiento.id}/"),
-#             "estado": agendamiento.estado,
-#             "backgroundColor": "#dc3545",
-#             "borderColor": "#dc3545"
-#         })
-    
-#     # Pasamos los eventos serializados en JSON al template
-#     eventos_json = json.dumps(eventos) if eventos else '[]'
-#     return render(request, 'dashboard_administrador.html', {
-#         'eventos_json': eventos_json
-#     })
-
 
 def calendario(request):
     # Obtenemos todos los agendamientos desde el modelo
@@ -602,104 +571,6 @@ class FlujoCajaListView(ListView):
         context['total_entradas'] = self.total_entradas
         context['total_salidas'] = self.total_salidas
         return context
-
-
-
-
-#actualizado 
-# def generar_consulta(request, agendamiento_id):
-#     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
-
-#     # Verificar si el agendamiento está en curso
-#     if agendamiento.estado == 'en_curso':
-#         return redirect('calendario_admin')  # Redirigir al calendario si el agendamiento está en curso
-
-#     if agendamiento.tipo == 'E':  # Evaluación
-#         if request.method == 'POST':
-#             motivo_consulta = request.POST.get('motivo_consulta')
-#             diagnostico = request.POST.get('diagnostico')
-#             fecha_consulta = request.POST.get('fecha_consulta')
-
-#             # Crear la consulta
-#             nueva_consulta = Consulta.objects.create(
-#                 paciente=agendamiento.paciente,
-#                 profesional=agendamiento.profesional,
-#                 fecha=fecha_consulta,
-#                 servicio=agendamiento.servicio,
-#                 hora=agendamiento.hora,
-#                 motivo_consulta=motivo_consulta,
-#                 diagnostico=diagnostico
-#             )
-
-#             # Actualizar estado del agendamiento
-#             agendamiento.estado = 'finalizado'
-#             agendamiento.save()
-
-#             return redirect('calendario_admin')
-
-#         return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
-
-#     elif agendamiento.tipo == 'S':  # Sesión
-#         sesiones_form = None
-
-#         if request.method == 'POST':
-#             sesiones_form = SesionesForm(request.POST)
-#             if sesiones_form.is_valid():
-#                 nueva_sesion = sesiones_form.save(commit=False)
-#                 nueva_sesion.paciente = agendamiento.paciente
-#                 nueva_sesion.agendamiento = agendamiento
-#                 nueva_sesion.servicio = agendamiento.servicio
-#                 nueva_sesion.save()
-
-#                 # Incrementar sesiones realizadas
-#                 nueva_sesion.total_realizadas += 1
-#                 nueva_sesion.save()
-
-#                 # Actualizar estado del agendamiento
-#                 agendamiento.estado = 'finalizado'
-#                 agendamiento.save()
-
-#                 return redirect('calendario_admin')
-
-#         if not sesiones_form:
-#             sesiones_form = SesionesForm()
-
-#         return render(request, 'sesion_detalle.html', {
-#             'agendamiento': agendamiento,
-#             'sesiones_form': sesiones_form
-#         })
-
-#     elif agendamiento.tipo == 'I':  # Informe
-#         if request.method == 'POST':
-#             form = InformeForm(request.POST)
-#             if form.is_valid():
-#                 informe = form.save(commit=False)
-#                 informe.paciente = agendamiento.paciente
-#                 informe.profesional = agendamiento.profesional
-#                 informe.fecha = agendamiento.fecha
-#                 informe.save()
-
-#                 # Actualizar estado del agendamiento
-#                 agendamiento.estado = 'finalizado'
-#                 agendamiento.save()
-
-#                 return redirect('calendario_admin')
-
-#         else:
-#             form = InformeForm(initial={
-#                 'paciente': agendamiento.paciente,
-#                 'profesional': agendamiento.profesional,
-#                 'fecha': agendamiento.fecha
-#             })
-
-#         return render(request, 'informe_form.html', {
-#             'form': form,
-#             'agendamiento': agendamiento
-#         })
-
-#     # En caso de que no se reconozca el tipo
-#     return redirect('calendario_admin')
-#backup de 29 11 2024
 
 
 def generar_consulta(request, agendamiento_id):
@@ -957,11 +828,15 @@ def generar_informe_pdf(request, pk):
 
 #generar sesiones
 def obtener_sesiones(request):
-        paciente_id = request.GET.get('paciente')
-        servicio_id = request.GET.get('servicio')
+    paciente_id = request.GET.get('paciente')
+    servicio_id = request.GET.get('servicio')
+
+    if paciente_id and servicio_id:
         sesiones = Sesiones.objects.filter(
-            paciente_id=paciente_id,
+            paciente_id=paciente_id, 
             servicio_id=servicio_id,
-            finalizado=False
-        ).values('id', 'nombre')  # Ajusta según los campos que necesites
-        return JsonResponse(list(sesiones), safe=False)
+            finalizado=False  # Filtrar sesiones no finalizadas
+        )
+        sesiones_data = [{'id': sesion.id, 'nombre': str(sesion)} for sesion in sesiones]
+        return JsonResponse(sesiones_data, safe=False)
+    return JsonResponse([], safe=False)
