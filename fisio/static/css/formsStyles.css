@@ -39,3 +39,10 @@ body {
 .form-card .btn-primary:hover {
     background-color: #5a4fcf;
 }
+
+.page-link {
+    color: #6A5ACD !important;
+}
+.page-link:hover {
+    text-decoration: underline;
+}

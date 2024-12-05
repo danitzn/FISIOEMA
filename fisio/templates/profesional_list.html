@@ -7,6 +7,25 @@
 
 <a href="{% url 'profesional_create' %}" class="btn btn-success mb-3">Nuevo Funcionario</a>
 
+<!-- Formulario de Filtros -->
+<form method="get" class="mb-4">
+  <div class="row">
+      <div class="col-md-3">
+          <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="{{ request.GET.nombre }}">
+      </div>
+      <div class="col-md-3">
+          <input type="text" name="apellidos" class="form-control" placeholder="Apellidos" value="{{ request.GET.apellidos }}">
+      </div>
+      <div class="col-md-3">
+          <input type="text" name="especialidad" class="form-control" placeholder="Especialidad" value="{{ request.GET.especialidad }}">
+      </div>
+      <div class="col-md-3">
+          <button type="submit" class="btn btn-primary">Filtrar</button>
+          <a href="{% url 'profesional_list' %}" class="btn btn-secondary">Limpiar</a>
+      </div>
+  </div>
+</form>
+
 <table class="table table-striped">
   <thead>
     <tr>
@@ -17,11 +36,11 @@
     </tr>
   </thead>
   <tbody>
-    {% for profesional in object_list %}
+    {% for profesional in profesionales %}
     <tr>
       <td>{{ profesional.nombre }}</td>
       <td>{{ profesional.apellidos }}</td>
-      <td>{{ profesional.especialidad }}</td>
+      <td>{{ profesional.responsable_area }}</td>
       <td>
         <a href="{% url 'profesional_detail' profesional.pk %}" class="btn btn-info">Ver</a>
         <a href="{% url 'profesional_update' profesional.pk %}" class="btn btn-warning">Editar</a>
@@ -31,4 +50,30 @@
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Paginación -->
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+          <li class="page-item">
+              <a class="page-link" href="?page=1{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.apellidos %}&apellidos={{ request.GET.apellidos }}{% endif %}{% if request.GET.especialidad %}&especialidad={{ request.GET.especialidad }}{% endif %}" style="color: #6A5ACD;">Primera</a>
+          </li>
+          <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.apellidos %}&apellidos={{ request.GET.apellidos }}{% endif %}{% if request.GET.especialidad %}&especialidad={{ request.GET.especialidad }}{% endif %}" style="color: #6A5ACD;">Anterior</a>
+          </li>
+      {% endif %}
+      <li class="page-item disabled">
+          <a class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</a>
+      </li>
+      {% if page_obj.has_next %}
+          <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.apellidos %}&apellidos={{ request.GET.apellidos }}{% endif %}{% if request.GET.especialidad %}&especialidad={{ request.GET.especialidad }}{% endif %}" style="color: #6A5ACD;">Siguiente</a>
+          </li>
+          <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.apellidos %}&apellidos={{ request.GET.apellidos }}{% endif %}{% if request.GET.especialidad %}&especialidad={{ request.GET.especialidad }}{% endif %}" style="color: #6A5ACD;">Última</a>
+          </li>
+      {% endif %}
+  </ul>
+</nav>
+
 {% endblock %}
