@@ -1,0 +1,56 @@
+{% extends 'base_administrativo.html' %}
+
+{% block content %}
+<h2 class="mt-4">Reporte de Agendamientos</h2>
+
+<form method="get" class="mb-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label for="fecha_desde" class="form-label">Desde</label>
+            <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ filtros.fecha_desde }}">
+        </div>
+        <div class="col-md-4">
+            <label for="fecha_hasta" class="form-label">Hasta</label>
+            <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ filtros.fecha_hasta }}">
+        </div>
+        <div class="col-md-4">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select class="form-control" id="tipo" name="tipo">
+                <option value="todos" {% if filtros.tipo == "todos" %}selected{% endif %}>Todos</option>
+                <option value="Evaluación" {% if filtros.tipo == "Evaluación" %}selected{% endif %}>Evaluación</option>
+                <option value="Sesión" {% if filtros.tipo == "Sesión" %}selected{% endif %}>Sesión</option>
+                <option value="Informe" {% if filtros.tipo == "Informe" %}selected{% endif %}>Informe</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Filtrar</button>
+</form>
+
+<h4 class="mt-4">Resultados por Especialidad</h4>
+
+{% for tipo, resultados in resumen.items %}
+    <div class="mt-4">
+        <h5>{{ tipo }}</h5>
+        {% if resultados %}
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Especialidad</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in resultados %}
+                        <tr>
+                            <td>{{ item.servicio__nombre }}</td>
+                            <td>{{ item.total }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No se encontraron {{ tipo | lower }} en el rango seleccionado.</p>
+        {% endif %}
+    </div>
+{% endfor %}
+{% endblock %}

@@ -195,7 +195,8 @@ class Agendamiento(models.Model):
                 raise ValidationError("No existe sesión válida. Debe cargar primero una evaluación.")
 
 
-
+    def __str__(self):
+        return f"{self.tipo} | {self.paciente} | {self.fecha} {self.hora} | {self.estado}"
 
 class Evaluacion(models.Model):
     agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='evaluaciones')
@@ -418,6 +419,11 @@ class Sesiones(models.Model):
     cantidad_realizadas = models.IntegerField(default=0)
     finalizado = models.BooleanField(default=False)
 
+
+    def __str__(self):
+        return f"{self.nombre}, {self.fecha_inicio}, {self.cantidad_sesiones}, {self.cantidad_realizadas}, {self.finalizado}"
+
+
     def save(self, *args, **kwargs):
         # Validación: cantidad_realizadas no puede exceder cantidad_sesiones
         if self.cantidad_realizadas > self.cantidad_sesiones:
@@ -440,7 +446,6 @@ class Sesiones(models.Model):
         except cls.DoesNotExist:
             return None  # No se encontró una sesión válida
 
-
        
 class SesionDetalle (models.Model):
     sesion = models.ForeignKey(Sesiones, on_delete=models.CASCADE)
@@ -455,6 +460,8 @@ class SesionDetalle (models.Model):
         ('PP', 'Pago Parcial'),
     ])
 
+    def __str__(self):
+        return f"{self.fecha}, {self.hora}, {self.observaciones}, {self.estado}, {self.estado_pago}"
 
 class FlujoCaja(models.Model):
     persona = models.CharField(max_length=20, null=True, blank=True)  # CI de paciente, profesional, o ninguno

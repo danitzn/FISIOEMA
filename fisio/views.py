@@ -3,6 +3,7 @@ import json
 import os
 import csv
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Count
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
@@ -21,6 +22,7 @@ from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
 from django.utils import timezone 
 from django.urls import reverse_lazy
+
 
 #logoutViews
 def logout_view(request):
@@ -826,6 +828,45 @@ def generar_informe_pdf(request, pk):
 
     return response
 
+
+class ReporteAgendamientosView(TemplateView):
+    template_name = 'reporte_agendamientos.html'
+
+    def get(self, request, *args, **kwargs):
+        # Obtener filtros desde el request
+        tipo = request.GET.get('tipo', 'todos')  # Valores: 'E', 'S', 'I', o 'todos'
+        fecha_desde = request.GET.get('fecha_desde')
+        fecha_hasta = request.GET.get('fecha_hasta')
+
+        # Filtrar agendamientos por fechas y tipo
+        agendamientos = Agendamiento.objects.all()
+
+        if fecha_desde:
+            agendamientos = agendamientos.filter(fecha__gte=fecha_desde)
+        if fecha_hasta:
+            agendamientos = agendamientos.filter(fecha__lte=fecha_hasta)
+        if tipo != 'todos':
+            agendamientos = agendamientos.filter(tipo=tipo)
+
+        # Agrupar y contar agendamientos por servicio
+        tipos = {'E': 'Evaluaciones', 'S': 'Sesiones', 'I': 'Informes'}
+        resumen = {
+            nombre: agendamientos.filter(tipo=tipo).values('servicio__nombre').annotate(total=Count('id'))
+            for tipo, nombre in tipos.items()
+        }
+
+        # Pasar los datos al template
+        context = {
+            'resumen': resumen,
+            'filtros': {
+                'tipo': tipo,
+                'fecha_desde': fecha_desde,
+                'fecha_hasta': fecha_hasta,
+            },
+        }
+        return render(request, self.template_name, context)
+
+
 #generar sesiones
 def obtener_sesiones(request):
     paciente_id = request.GET.get('paciente')
@@ -840,3 +881,5 @@ def obtener_sesiones(request):
         sesiones_data = [{'id': sesion.id, 'nombre': str(sesion)} for sesion in sesiones]
         return JsonResponse(sesiones_data, safe=False)
     return JsonResponse([], safe=False)
+
+
