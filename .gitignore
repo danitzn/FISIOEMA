@@ -1,3 +1,10 @@
-fisio/static/images/*.jpg:Zone.Identifier
-eval "$(ssh-agent -s)"
-eval "$(ssh-agent -s)".pub
+'eval "$(ssh-agent -s)"'
+'eval "$(ssh-agent -s)".pub'
+'fisio/static/images/fisio1.jpg:Zone.Identifier'
+'fisio/static/images/fisio2.jpg:Zone.Identifier'
+'fisio/static/images/fisio3.jpg:Zone.Identifier'
+'fisio/static/images/fisio4.jpg:Zone.Identifier'
+'fisio/static/images/fisio5.jpg:Zone.Identifier'
+'fisio/static/images/fisio6.jpg:Zone.Identifier'
+'fisio/static/images/fisio7.jpg:Zone.Identifier'
+'fisio/static/images/fisio8.jpg:Zone.Identifier'
