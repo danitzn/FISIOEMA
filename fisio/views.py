@@ -73,6 +73,7 @@ class ServicioListView(ListView):
     model = Servicio
     template_name = 'servicio_list.html'
     context_object_name = 'servicios'
+    paginate_by = 10
 
 class ServicioDetailView(DetailView):
     model = Servicio
@@ -112,6 +113,7 @@ class PacienteListView(ListView):
     model = Paciente
     template_name = 'paciente_list.html'
     context_object_name = 'pacientes'
+    paginate_by = 10
 
 class PacienteDetailView(DetailView):
     model = Paciente
@@ -140,6 +142,7 @@ class PacienteListProfView(ListView):
     model = Paciente
     template_name = 'paciente_list_prof.html'
     context_object_name = 'pacientesp'
+    paginate_by = 10
 
 class PacienteDetailProfView(DetailView):
     model = Paciente
@@ -163,6 +166,7 @@ class ProfesionalListView(ListView):
     model = Profesional
     template_name = 'profesional_list.html'
     context_object_name = 'profesionales'
+    paginate_by = 10
 
 class ProfesionalDetailView(DetailView):
     model = Profesional
@@ -191,6 +195,7 @@ class ProfesionalListProfView(ListView):
     model = Profesional
     template_name = 'profesional_list_prof.html'
     context_object_name = 'profesionalesp'
+    paginate_by = 10
 
 class ProfesionalDetailProfView(DetailView):
     model = Profesional
@@ -202,6 +207,7 @@ class ProfesionalListPacView(ListView):
     model = Profesional
     template_name = 'profesional_list_paciente.html'
     context_object_name = 'profesionalespac'
+    paginate_by = 10
 
 class ProfesionalDetailPacView(DetailView):
     model = Profesional
@@ -343,6 +349,7 @@ class AgendamientoListView(ListView):
     model = Agendamiento
     template_name = 'agendamiento_list.html'
     context_object_name = 'agendamientos'
+    paginate_by = 10
 
 class AgendamientoDetailView(DetailView):
     model = Agendamiento
@@ -416,6 +423,7 @@ class AgendamientoListProfView(ListView):
     model = Agendamiento
     template_name = 'agendamiento_list_prof.html'
     context_object_name = 'agendamientosp'
+    paginate_by = 10
 
 class AgendamientoDetailProfView(DetailView):
     model = Agendamiento
@@ -438,6 +446,7 @@ class HorarioAtencionListProfView(ListView):
     model = HorarioAtencion
     template_name = 'horario_list_prof.html'
     context_object_name = 'horarios_atencionp'
+    paginate_by = 10
 
     def get_queryset(self):
         return HorarioAtencion.objects.filter(profesional__isnull=False)
@@ -452,6 +461,7 @@ class HorarioAtencionListPacView(ListView):
     model = HorarioAtencion
     template_name = 'horario_list_paciente.html'
     context_object_name = 'horarios_atencion'
+    paginate_by = 10
 
     def get_queryset(self):
         return HorarioAtencion.objects.filter(profesional__isnull=False)
@@ -466,6 +476,7 @@ class HorarioAtencionListView(ListView):
     model = HorarioAtencion
     template_name = 'horario_list.html'
     context_object_name = 'horarios_atencionp'
+    paginate_by = 10
 
     def get_queryset(self):
         return HorarioAtencion.objects.filter(profesional__isnull=False)
@@ -546,6 +557,7 @@ class FlujoCajaListView(ListView):
     model = FlujoCaja
     template_name = 'flujo_caja_list.html'
     context_object_name = 'flujo_dinero'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = FlujoCaja.objects.all()
@@ -628,10 +640,10 @@ def generar_consulta(request, agendamiento_id):
             return redirect('calendario_admin')
 
         return render(request, 'sesion_detalle.html', {
-            'agendamiento': agendamiento,
-            'sesiones_form': sesiones_form
+        'agendamiento': agendamiento,
+        'sesionesDetalle_form': sesiones_form  # Ajusta la clave aquí
         })
-
+    
     elif agendamiento.tipo == 'I':  # Informe
         informe = None
         form = InformeForm(request.POST or None, initial={

@@ -3,7 +3,7 @@
 <h2>Detalle de Sesión</h2>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ sesionesDetalle_form.as_p }}
     <button type="submit" class="btn btn-primary">Guardar</button>
 </form>
 {% endblock %}

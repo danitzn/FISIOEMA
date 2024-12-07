@@ -131,11 +131,20 @@ class SesionesForm(forms.ModelForm):
 class SesionDetalleForm(forms.ModelForm):
     class Meta:
         model = SesionDetalle
-        fields = ['numero_sesion', 'fecha', 'hora', 'observaciones', 'estado', 'estado_pago']
+        fields = [
+            'numero_sesion', 
+            'fecha', 
+            'hora', 
+            'observaciones', 
+            'estado', 
+            'estado_pago'
+        ]
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date'}),
             'hora': forms.TimeInput(attrs={'type': 'time'}),
         }
+
+
 
 class InformeForm(forms.ModelForm):
     class Meta:
