@@ -10,7 +10,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
 from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Servicio, Area, Sesiones
-from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionesForm, InformeForm
+from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -585,10 +585,13 @@ class FlujoCajaListView(ListView):
         context['total_entradas'] = self.total_entradas
         context['total_salidas'] = self.total_salidas
         return context
-
-
 def generar_consulta(request, agendamiento_id):
     agendamiento = get_object_or_404(Agendamiento, id=agendamiento_id)
+
+    # Si el tipo es Sesión, obtener la sesión asociada desde referencia_sesion
+    sesion = None
+    if agendamiento.referencia_sesion:
+        sesion = get_object_or_404(Sesiones, id=agendamiento.referencia_sesion)
 
     # Verificar si el agendamiento está en curso
     if agendamiento.estado == 'en_curso':
@@ -617,21 +620,24 @@ def generar_consulta(request, agendamiento_id):
 
             return redirect('calendario_admin')
 
-        return render(request, 'generar_consulta.html', {'agendamiento': agendamiento})
+        # Redirigir al formulario de sesiones
+        sesiones_form = SesionesForm()
+        return render(request, 'generar_consulta.html', {'sesionesForm': sesiones_form, 'agendamiento': agendamiento})
 
     elif agendamiento.tipo == 'S':  # Sesión
-        sesiones_form = SesionesForm(request.POST or None)
+        sesiones_form = SesionDetalleForm(request.POST or None)
 
         if request.method == 'POST' and sesiones_form.is_valid():
             nueva_sesion = sesiones_form.save(commit=False)
+            nueva_sesion.sesion = sesion  # Asigna la sesión obtenida desde referencia_sesion
             nueva_sesion.paciente = agendamiento.paciente
             nueva_sesion.agendamiento = agendamiento
             nueva_sesion.servicio = agendamiento.servicio
             nueva_sesion.save()
 
             # Incrementar sesiones realizadas
-            nueva_sesion.total_realizadas += 1
-            nueva_sesion.save()
+            sesion.cantidad_realizadas += 1
+            sesion.save()
 
             # Actualizar estado del agendamiento
             agendamiento.estado = 'finalizado'
@@ -640,37 +646,38 @@ def generar_consulta(request, agendamiento_id):
             return redirect('calendario_admin')
 
         return render(request, 'sesion_detalle.html', {
-        'agendamiento': agendamiento,
-        'sesionesDetalle_form': sesiones_form  # Ajusta la clave aquí
+            'agendamiento': agendamiento,
+            'sesionesDetalle_form': sesiones_form
         })
-    
+
     elif agendamiento.tipo == 'I':  # Informe
         informe = None
         form = InformeForm(request.POST or None, initial={
-        'paciente': agendamiento.paciente,
-        'profesional': agendamiento.profesional,
-        'fecha': date.today()
-    })
+            'paciente': agendamiento.paciente,
+            'profesional': agendamiento.profesional,
+            'fecha': date.today()
+        })
 
-    if request.method == 'POST' and form.is_valid():
-        informe = form.save(commit=False)
-        informe.paciente = agendamiento.paciente
-        informe.profesional = agendamiento.profesional
-        informe.fecha = date.today()
-        informe.save()
+        if request.method == 'POST' and form.is_valid():
+            informe = form.save(commit=False)
+            informe.paciente = agendamiento.paciente
+            informe.profesional = agendamiento.profesional
+            informe.fecha = date.today()
+            informe.save()
 
-        # Actualizar estado del agendamiento
-        agendamiento.estado = 'finalizado'
-        agendamiento.save()
+            # Actualizar estado del agendamiento
+            agendamiento.estado = 'finalizado'
+            agendamiento.save()
 
-        return redirect('calendario_admin')
+            return redirect('calendario_admin')
 
-    return render(request, 'informe_form.html', {
-        'form': form,
-        'agendamiento': agendamiento,
-        'informe': informe  # Pasa el informe al contexto
-    })
-
+        return render(request, 'informe_form.html', {
+            'form': form,
+            'agendamiento': agendamiento,
+            'informe': informe
+        })
+    
+    
 def buscar_consultas_por_ci(request):
     consultas = None
     nrodocumento = None
@@ -895,3 +902,22 @@ def obtener_sesiones(request):
     return JsonResponse([], safe=False)
 
 
+class DetalleSesionesView(TemplateView):
+    template_name = 'sesionesform.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Sesionesform'] = SesionesForm()  # Incluye el formulario
+        return context
+
+def sesiones_view(request):
+    if request.method == "POST":
+        form = SesionesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Redirecciona o muestra un mensaje de éxito
+            return redirect('nombre_de_la_url')  # Reemplaza con tu URL de redirección
+    else:
+        form = SesionesForm()
+    
+    return render(request, 'tu_template.html', {'Sesionesform': form})

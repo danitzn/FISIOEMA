@@ -24,15 +24,14 @@
             <input type="checkbox" id="tiene_sesiones" name="tiene_sesiones">
         </div>
 
-        <!-- Sección para crear sesiones -->
         <div id="sesiones_form_section" style="display: none;">
-            <h3 class="text-xl font-semibold mt-4">Detalles de Sesiones</h3>
-            {{ sesiones_form.as_p }}
+            <h3 class="text-xl font-semibold mt-4">Detalles de la Sesion</h3>
+            {{ sesionesForm.as_p }}
         </div>
-
         <button type="submit" class="btn btn-primary">Guardar Consulta</button>
     </form>
-    <a href="{% url 'calendario_admin' %}" class="btn btn-secondary mt-3">Volver al Calendario</a>
+    
+    <a href="{% url 'calendario_admin' %}" class="btn btn-secondary mt-0">Volver al Calendario</a>
 
     <script>
         // Mostrar/ocultar el formulario de sesiones según el checkbox
