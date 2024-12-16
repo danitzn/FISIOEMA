@@ -1,0 +1,19 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Responsable Form</title>
+</head>
+<body>
+    <h2>{{ view.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+</body>
+</html>
+{% endblock %}

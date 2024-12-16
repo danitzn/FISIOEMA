@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
-from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Servicio, Area, Sesiones
-from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, SesionDetalleForm, SesionesForm, InformeForm
+from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, Sesiones
+from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -300,6 +300,40 @@ def home(request):
             return render(request, 'login.html', {'error_message': error_message})
     return render(request, 'login.html')
 
+
+class ResponsableCreateView(CreateView):
+    model = Responsable
+    form_class = ResponsableForm
+    template_name = 'responsable_form.html'
+    success_url = reverse_lazy('responsable_list')
+
+class ResponsableUpdateView(UpdateView):
+    model = Responsable
+    form_class = ResponsableForm
+    template_name = 'responsable_form.html'
+    success_url = reverse_lazy('responsable_list')
+
+class ResponsableDeleteView(DeleteView):
+    model = Responsable
+    template_name = 'responsable_confirm_delete.html'
+    success_url = reverse_lazy('responsable_list')
+
+
+class ResponsableDetailView(DetailView):
+    model = Responsable
+    template_name = 'responsable_detail.html'
+    context_object_name = 'responsable'
+
+
+class ResponsableListView(ListView):
+    model = Responsable
+    template_name = 'responsable_list.html'
+    context_object_name = 'responsables'
+
+
+
+
+
 # Agendamiento - Perfil Admin
 
 
@@ -309,37 +343,84 @@ class AgendamientoCreateView(CreateView):
     template_name = 'agendamiento_form.html'
     success_url = reverse_lazy('confirmacion_agendamiento')
 
-    def form_valid(self, form):
-        profesional = form.cleaned_data['profesional']
-        servicio = form.cleaned_data['servicio']
-        fecha = form.cleaned_data['fecha']
-        hora = form.cleaned_data['hora']
-        tipo = form.cleaned_data['tipo']
-        referencia_sesion = form.cleaned_data.get('referencia_sesion')
+    # def form_valid(self, form):
+    #     profesional = form.cleaned_data['profesional']
+    #     servicio = form.cleaned_data['servicio']
+    #     fecha = form.cleaned_data['fecha']
+    #     hora = form.cleaned_data['hora']
+    #     tipo = form.cleaned_data['tipo']
+    #     referencia_sesion = form.cleaned_data.get('referencia_sesion')
 
-        # Validar tipo 'Sesión' con referencia_sesion
-        if tipo == 'S':
-            if not referencia_sesion:
-                messages.error(self.request, "Debe seleccionar una sesión de referencia para el tipo 'Sesión'.")
-                return self.form_invalid(form)
+    #     # Validar tipo 'Sesión' con referencia_sesion
+    #     if tipo == 'S':
+    #         if not referencia_sesion:
+    #             messages.error(self.request, "Debe seleccionar una sesión de referencia para el tipo 'Sesión'.")
+    #             return self.form_invalid(form)
 
-            sesion = Sesiones.validar_sesion(
-                referencia_sesion=referencia_sesion,
-                paciente=form.cleaned_data['paciente'],
-                servicio=servicio
-            )
-            if not sesion:
-                messages.error(self.request, "La sesión de referencia no es válida o ya finalizó.")
-                return self.form_invalid(form)
+    #         sesion = Sesiones.validar_sesion(
+    #             referencia_sesion=referencia_sesion,
+    #             paciente=form.cleaned_data['paciente'],
+    #             servicio=servicio
+    #         )
+    #         if not sesion:
+    #             messages.error(self.request, "La sesión de referencia no es válida o ya finalizó.")
+    #             return self.form_invalid(form)
 
-            form.instance.referencia_sesion = referencia_sesion
-        else:
-            form.instance.referencia_sesion = None
+    #         form.instance.referencia_sesion = referencia_sesion
+    #     else:
+    #         form.instance.referencia_sesion = None
 
-        # Resto de la lógica
-        form.instance.estado = 'pendiente'
-        messages.success(self.request, "Agendamiento creado exitosamente.")
-        return super().form_valid(form)
+    #     # Resto de la lógica
+    #     form.instance.estado = 'pendiente'
+    #     messages.success(self.request, "Agendamiento creado exitosamente.")
+    #     return super().form_valid(form)
+
+def form_valid(self, form):
+    profesional = form.cleaned_data['profesional']
+    servicio = form.cleaned_data['servicio']
+    fecha = form.cleaned_data['fecha']
+    hora = form.cleaned_data['hora']
+    tipo = form.cleaned_data['tipo']
+    paciente = form.cleaned_data['paciente']
+    referencia_sesion = form.cleaned_data.get('referencia_sesion')
+
+    # Validar el horario de atención
+    horario_atencion = HorarioAtencion.objects.filter(
+        profesional=profesional,
+        servicio=servicio,
+        fecha=fecha,
+        hora_inicio__lte=hora,
+        hora_fin__gt=hora
+    ).first()
+
+    if not horario_atencion:
+        messages.error(self.request, "El horario no coincide con el horario de atención del profesional.")
+        return self.form_invalid(form)
+
+    # Validar tipo 'Sesión' con referencia_sesion
+    if tipo == 'S':
+        if not referencia_sesion:
+            messages.error(self.request, "Debe seleccionar una sesión de referencia para el tipo 'Sesión'.")
+            return self.form_invalid(form)
+
+        sesion = Sesiones.validar_sesion(
+            referencia_sesion=referencia_sesion,
+            paciente=paciente,
+            servicio=servicio
+        )
+        if not sesion:
+            messages.error(self.request, "La sesión de referencia no es válida o ya finalizó.")
+            return self.form_invalid(form)
+
+        form.instance.referencia_sesion = referencia_sesion
+    else:
+        form.instance.referencia_sesion = None
+
+    # Definir estado inicial como pendiente
+    form.instance.estado = 'pendiente'
+
+    messages.success(self.request, "Agendamiento creado exitosamente.")
+    return super().form_valid(form)
 
 
 class ConfirmacionAgendamientoView(TemplateView):

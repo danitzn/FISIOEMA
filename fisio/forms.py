@@ -1,8 +1,8 @@
 # forms.py
 from django import forms
-from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Servicio, Sesiones, SesionDetalle, Informe
+from .models import Agendamiento, Area, HorarioAtencion, Paciente, Profesional, Responsable, Servicio, Sesiones, SesionDetalle, Informe
 from django.contrib.auth.models import User
-from .models import Perfil
+from .models import Perfil, Responsable
 from django.core.validators import validate_email
 
 class AreaForm (forms.ModelForm):
@@ -84,6 +84,12 @@ class PacienteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PacienteForm, self).__init__(*args, **kwargs)
         self.fields['fecha_nacimiento'].input_formats = ['%d/%m/%Y']  # Formato aceptado al ingresar la fecha
+
+
+class ResponsableForm(forms.ModelForm):
+    class Meta:
+        model = Responsable
+        fields = ['nrodocumento', 'nombre', 'apellido', 'celular', 'mail']
 
 
 class AgendamientoForm(forms.ModelForm):

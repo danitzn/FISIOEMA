@@ -173,7 +173,31 @@ class Agendamiento(models.Model):
     estado = models.CharField(max_length=30, choices=ESTADOS, default='pendiente')
     referencia_sesion = models.IntegerField(null=True, blank=True)
 
+    # def clean(self):
+    #     agendamientos_conflictivos = Agendamiento.objects.filter(
+    #         profesional=self.profesional,
+    #         servicio=self.servicio,
+    #         fecha=self.fecha,
+    #         hora=self.hora
+    #     ).exclude(id=self.id)
+
+    #     if agendamientos_conflictivos.exists():
+    #         raise ValidationError("Este turno ya está reservado para este profesional.")
+
+    #     # Validar referencia_sesion
+    #     if self.tipo == 'S' and self.referencia_sesion:
+    #         sesion = Sesiones.validar_sesion(
+    #             referencia_sesion=self.referencia_sesion,
+    #             paciente=self.paciente,
+    #             servicio=self.servicio
+    #         )
+    #         if sesion is None:  # Manejar el caso donde no haya una sesión válida
+    #             raise ValidationError("No existe sesión válida. Debe cargar primero una evaluación.")
+
     def clean(self):
+        super().clean()
+
+        # 1. Verificar conflictos de agendamientos
         agendamientos_conflictivos = Agendamiento.objects.filter(
             profesional=self.profesional,
             servicio=self.servicio,
@@ -184,26 +208,39 @@ class Agendamiento(models.Model):
         if agendamientos_conflictivos.exists():
             raise ValidationError("Este turno ya está reservado para este profesional.")
 
-        # Validar referencia_sesion
-        if self.tipo == 'S' and self.referencia_sesion:
+        # 2. Validar que el horario del agendamiento coincida con el horario de atención
+        horario_atencion = HorarioAtencion.objects.filter(
+            profesional=self.profesional,
+            servicio=self.servicio,
+            fecha=self.fecha,
+            hora_inicio__lte=self.hora,
+            hora_fin__gt=self.hora
+        ).first()
+
+        if not horario_atencion:
+            raise ValidationError("El horario del agendamiento no coincide con el horario de atención del profesional.")
+
+        # 3. Validar referencia_sesion para el tipo 'Sesión'
+        if self.tipo == 'S':
+            if not self.referencia_sesion:
+                raise ValidationError("Debe seleccionar una sesión de referencia para el tipo 'Sesión'.")
+            
             sesion = Sesiones.validar_sesion(
                 referencia_sesion=self.referencia_sesion,
                 paciente=self.paciente,
                 servicio=self.servicio
             )
-            if sesion is None:  # Manejar el caso donde no haya una sesión válida
-                raise ValidationError("No existe sesión válida. Debe cargar primero una evaluación.")
+            if not sesion:
+                raise ValidationError("La sesión de referencia no es válida o ya finalizó.")
+
+        # 4. Validar que la fecha no sea domingo
+        if self.fecha.weekday() == 6:
+            raise ValidationError("No se pueden agendar turnos los domingos.")
 
 
-    def __str__(self):
-        return f"{self.tipo} | {self.paciente} | {self.fecha} {self.hora} | {self.estado}"
+        def __str__(self):
+            return f"{self.tipo} | {self.paciente} | {self.fecha} {self.hora} | {self.estado}"
 
-class Evaluacion(models.Model):
-    agendamiento = models.ForeignKey(Agendamiento, on_delete=models.CASCADE, related_name='evaluaciones')
-    resultado_clinico = models.TextField()
-
-    def __str__(self):
-        return f"Evaluación de {self.agendamiento}"
 
 
 class HistoriaMedico(models.Model):

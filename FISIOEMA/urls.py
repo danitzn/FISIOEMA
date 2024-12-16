@@ -6,7 +6,7 @@ from fisio.views import (
     AgendamientoCreateProfView, AgendamientoCreateView, AgendamientoDeleteProfView, AgendamientoDeleteView, AgendamientoDetailProfView, AgendamientoDetailView, AgendamientoListProfView, AgendamientoListView, AgendamientoUpdateProfView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailProfView, AreaDetailView, AreaListProfView, AreaListView, AreaUpdateView, ConfirmacionAgendamientoProfView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailPacView, HorarioAtencionDetailProfView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListPacView, HorarioAtencionListProfView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteDetailPacView, PacienteDetailProfView, PacienteListProfView, PacienteListView, PacienteDetailView, PacienteCreateView, PacienteUpdateProfView,
     PacienteUpdateView, PacienteDeleteView, ProfesionalDetailPacView, ProfesionalDetailProfView, ProfesionalListPacView, ProfesionalListProfView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView, 
-    ProfesionalUpdateView, ProfesionalDeleteView, ReporteAgendamientosView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home, obtener_sesiones,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
+    ProfesionalUpdateView, ProfesionalDeleteView, ReporteAgendamientosView, ResponsableCreateView, ResponsableDeleteView, ResponsableDetailView, ResponsableListView, ResponsableUpdateView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home, obtener_sesiones,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
 )
 
 urlpatterns = [
@@ -121,7 +121,11 @@ urlpatterns = [
 
     #procesos
      path('obtener_sesiones/', obtener_sesiones, name='obtener_sesiones'),
-    
-    
-]
 
+     #responsable
+    path('responsable/new/', ResponsableCreateView.as_view(), name='responsable_create'),
+    path('responsable/<int:pk>/edit/', ResponsableUpdateView.as_view(), name='responsable_update'),
+    path('responsable/<int:pk>/delete/', ResponsableDeleteView.as_view(), name='responsable_confirm_delete'),
+    path('responsable/<int:pk>/', ResponsableDetailView.as_view(), name='responsable_detail'),
+    path('responsables/', ResponsableListView.as_view(), name='responsable_list'), 
+]

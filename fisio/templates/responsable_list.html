@@ -1,0 +1,35 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+{% block title %}Lista de Responsables{% endblock %}
+
+{% block content %}
+<h1>Lista de Responsables</h1>
+
+<a href="{% url 'responsable_create' %}" class="btn btn-success mb-3">Crear Nuevo Responsable</a>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>Email</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for responsable in responsables %}
+    <tr>
+      <td>{{ responsable.nombre }}</td>
+      <td>{{ responsable.apellido }}</td>
+      <td>{{ responsable.email }}</td>
+      <td>
+        <a href="{% url 'responsable_detail' responsable.pk %}" class="btn btn-info">Ver</a>
+        <a href="{% url 'responsable_update' responsable.pk %}" class="btn btn-warning">Editar</a>
+        <a href="{% url 'responsable_confirm_delete' responsable.pk %}" class="btn btn-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
