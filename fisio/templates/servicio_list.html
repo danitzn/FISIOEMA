@@ -1,7 +1,8 @@
 {% extends 'base_administrativo.html' %}
 {% load static %}
-{% block title %}Áreas de Servicio{% endblock %}
+{% load humanize %}  <!-- Cargar el filtro humanize -->
 
+{% block title %}Áreas de Servicio{% endblock %}
 
 {% block content %}
 <h1>Servicio Tarifas</h1>
@@ -11,7 +12,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>servicio</th>
+      <th>Servicio</th>
       <th>Precio</th>
       <th>Acciones</th>
     </tr>
@@ -20,7 +21,7 @@
     {% for servicio in servicios %}
     <tr>
       <td>{{ servicio.nombre }}</td>
-      <td>{{ servicio.monto }}</td>
+      <td>{{ servicio.monto|floatformat:0|intcomma }}</td>  <!-- Aplicar los filtros aquí -->
       <td>
         <a href="{% url 'servicio_detail' servicio.pk %}" class="btn btn-info">Ver</a>
         <a href="{% url 'servicio_update' servicio.pk %}" class="btn btn-warning">Editar</a>

@@ -1,12 +1,9 @@
 {% extends 'base_administrativo.html' %}
 {% load static %}
-
 {% block content %}
 <h2 class="mb-4">Agendar Turno</h2>
-
 <form method="post" class="bg-white p-4 rounded-lg shadow-md">
     {% csrf_token %}
-    
     <div class="row g-3">
         <div class="col-md-6">
             <label for="id_profesional" class="form-label">Profesional</label>

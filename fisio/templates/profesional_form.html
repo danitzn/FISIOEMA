@@ -12,49 +12,105 @@
             <form method="post" class="bg-white p-4 rounded-lg shadow-md">
                 {% csrf_token %}
                 
+                <!-- Mostrar errores no relacionados con campos específicos -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
                 <div class="row g-3">
                     <!-- Primera fila: Nro. de Documento y Nombre -->
                     <div class="col-md-6">
                         <label for="id_nrodocumento" class="form-label">Nro. de Documento</label>
                         {{ form.nrodocumento }}
+                        {% if form.nrodocumento.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.nrodocumento.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         <label for="id_nombre" class="form-label">Nombre</label>
                         {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.nombre.errors }}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <!-- Segunda fila: Apellido y Fecha de Nacimiento -->
                     <div class="col-md-6">
                         <label for="id_apellido" class="form-label">Apellido</label>
                         {{ form.apellidos }}
+                        {% if form.apellidos.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.apellidos.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
                         {{ form.fecha_nacimiento }}
+                        {% if form.fecha_nacimiento.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.fecha_nacimiento.errors }}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <!-- Tercera fila: Celular y Correo Electrónico -->
                     <div class="col-md-6">
                         <label for="id_celular" class="form-label">Celular</label>
                         {{ form.celular }}
+                        {% if form.celular.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.celular.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         <label for="id_correo" class="form-label">Correo Electrónico</label>
                         {{ form.correo }}
+                        {% if form.correo.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.correo.errors }}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <!-- Fila adicional: Sexo, Activo y Responsable Área (si se necesitan) -->
                     <div class="col-md-4">
                         <label for="id_sexo" class="form-label">Sexo</label>
                         {{ form.sexo }}
+                        {% if form.sexo.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.sexo.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         <label for="id_responsable" class="form-label">Responsable área</label>
                         {{ form.responsable_area }}
+                        {% if form.responsable_area.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.responsable_area.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-1">
                         <label for="id_activo" class="form-label">Activo</label>
                         {{ form.activo }}
+                        {% if form.activo.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.activo.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 

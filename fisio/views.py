@@ -10,9 +10,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
 from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, Sesiones
-from .forms import AgendamientoForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
+from .forms import AgendamientoForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.decorators.csrf import requires_csrf_token
@@ -178,6 +179,14 @@ class ProfesionalCreateView(CreateView):
     form_class = ProfesionalForm
     template_name = 'profesional_form.html'
     success_url = reverse_lazy('profesional_list')
+
+    def form_invalid(self, form):
+        # Captura el ValidationError y pásalo al formulario
+        try:
+            return super().form_invalid(form)
+        except ValidationError as e:
+            form.add_error(None, e)
+            return self.render_to_response(self.get_context_data(form=form))
 
 class ProfesionalUpdateView(UpdateView):
     model = Profesional
@@ -573,9 +582,18 @@ class HorarioAtencionCreateView(CreateView):
     template_name = 'horario_atencion_form.html'
     success_url = reverse_lazy('horario_list')
 
+    def form_invalid(self, form):
+        # Captura el ValidationError y pásalo al formulario
+        try:
+            return super().form_invalid(form)
+        except ValidationError as e:
+            form.add_error(None, e)
+            return self.render_to_response(self.get_context_data(form=form))
+
 class HorarioAtencionUpdateView(UpdateView):
     model = HorarioAtencion
     fields = '__all__'
+    form_class = HorarioForm
     template_name = 'horario_atencion_form.html'
     success_url = reverse_lazy('horario_list')
 
