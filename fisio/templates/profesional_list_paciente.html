@@ -10,6 +10,7 @@
     <tr>
       <th>Nombre</th>
       <th>Apellidos</th>
+      <th>Documento</th>
       <th>Especialidad</th>
       <th>Acciones</th>
     </tr>
@@ -19,6 +20,7 @@
     <tr>
       <td>{{ profesional.nombre }}</td>
       <td>{{ profesional.apellidos }}</td>
+      <td>{{ profesional.nrodocumento }}</td>
       <td>{{ profesional.especialidad }}</td>
       <td>
         <a href="{% url 'profesional_detail_paciente' profesional.pk %}" class="btn btn-info">Ver</a>
