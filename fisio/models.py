@@ -121,6 +121,7 @@ class Profesional(models.Model):
     nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
+    registro_profesional = models.CharField(max_length=40)
     fecha_nacimiento = models.DateField()
     celular = models.CharField(max_length=20)
     correo = models.EmailField()
