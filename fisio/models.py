@@ -46,6 +46,7 @@ class Responsable(models.Model):
         if not re.match(r"[^@]+@[^@]+\.[^@]+", self.mail):
             raise ValidationError({'mail': 'El correo electrónico no es válido.'})
     
+
 class Paciente(models.Model):
     nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
@@ -63,14 +64,16 @@ class Paciente(models.Model):
     @property
     def edad(self):
         """Calcula la edad del paciente en función de su fecha de nacimiento."""
-        today = date.today()
-        return today.year - self.fecha_nacimiento.year - (
-            (today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
-        )
+        if self.fecha_nacimiento:
+            today = date.today()
+            return today.year - self.fecha_nacimiento.year - (
+                (today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+            )
+        return None
 
     def es_mayor_de_edad(self):
         """Devuelve True si el paciente es mayor de edad, False si no lo es."""
-        return self.edad >= 18
+        return self.edad is not None and self.edad >= 18
 
     def clean(self):
         """Realiza las validaciones del modelo antes de guardar."""
@@ -85,6 +88,20 @@ class Paciente(models.Model):
         # Verifica si el correo electrónico ya está registrado
         if Paciente.objects.filter(mail=self.mail).exclude(pk=self.pk).exists():
             raise ValidationError('El correo electrónico ya está registrado.')
+
+        # Validar que el nrodocumento solo contenga números
+        if not self.nrodocumento.isdigit():
+            raise ValidationError({'nrodocumento': 'El número de documento debe contener solo números.'})
+
+        # Validar que el nombre y apellido solo contengan letras
+        if not re.match("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", self.nombre):
+            raise ValidationError({'nombre': 'El nombre debe contener solo letras.'})
+        if not re.match("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", self.apellido):
+            raise ValidationError({'apellido': 'El apellido debe contener solo letras.'})
+
+        # Validar que el celular solo contenga números
+        if not self.celular.isdigit():
+            raise ValidationError({'celular': 'El número de celular debe contener solo números.'})
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
