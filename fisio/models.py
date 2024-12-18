@@ -1,3 +1,4 @@
+import re
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -25,6 +26,25 @@ class Responsable(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+    
+    def clean(self):
+        # Validar que el nrodocumento solo contenga números
+        if not self.nrodocumento.isdigit():
+            raise ValidationError({'nrodocumento': 'El número de documento debe contener solo números.'})
+
+        # Validar que el nombre y apellido solo contengan letras
+        if not re.match("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", self.nombre):
+            raise ValidationError({'nombre': 'El nombre debe contener solo letras.'})
+        if not re.match("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", self.apellido):
+            raise ValidationError({'apellido': 'El apellido debe contener solo letras.'})
+
+        # Validar que el celular solo contenga números
+        if not self.celular.isdigit():
+            raise ValidationError({'celular': 'El número de celular debe contener solo números.'})
+
+        # Validar que el email tenga un formato correcto (esto ya lo hace EmailField, pero puedes agregar validaciones adicionales si es necesario)
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", self.mail):
+            raise ValidationError({'mail': 'El correo electrónico no es válido.'})
     
 class Paciente(models.Model):
     nrodocumento = models.CharField(max_length=20, unique=True)

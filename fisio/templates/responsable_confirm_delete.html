@@ -1,0 +1,19 @@
+{% extends 'base_administrativo.html' %}
+{% load static %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-danger">Confirmar Eliminación</h2>
+        <p>¿Estás seguro que deseas eliminar al responsable <strong>{{ responsable.nombre }}</strong>?</p>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a href="{% url 'responsable_list' %}" class="btn btn-secondary ms-3">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
