@@ -111,7 +111,10 @@ class AgendamientoForm(forms.ModelForm):
 class ProfesionalForm(forms.ModelForm):
     class Meta:
         model = Profesional
-        fields = '__all__'
+        fields = ['nrodocumento', 'nombre', 'apellidos', 'fecha_nacimiento', 'celular', 'correo', 'sexo', 'responsable_area', 'activo']
+        widgets = {
+            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
 
 class HorarioForm (forms.ModelForm):

@@ -143,6 +143,13 @@ class Profesional(models.Model):
             if self.fecha_nacimiento > date.today():
                 raise ValidationError("La fecha de nacimiento no puede ser en el futuro.")
             
+            # Validar que el profesional tenga al menos 18 años
+            edad = date.today().year - self.fecha_nacimiento.year - (
+                (date.today().month, date.today().day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+            )
+            if edad < 18:
+                raise ValidationError("El profesional debe tener al menos 18 años de edad.")
+            
             # Validar que el número de documento solo contenga dígitos
             if not self.nrodocumento.isdigit():
                 raise ValidationError("El número de documento debe contener solo dígitos.")
@@ -150,7 +157,7 @@ class Profesional(models.Model):
             # Validar que el celular solo contenga dígitos
             if not self.celular.isdigit():
                 raise ValidationError("El número de celular debe contener solo dígitos.")
-            
+        
         except TypeError:
             raise ValidationError("Error en alguna entrada de dato. Favor corregir.")
 #datos del horario de atencion de los profesionales
