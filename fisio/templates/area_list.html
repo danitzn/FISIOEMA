@@ -7,7 +7,16 @@
 <h1>Áreas de Servicio</h1>
 
 <a href="{% url 'area_create' %}" class="btn btn-success mb-3">Crear Nueva Área</a>
-
+<form method="get" class="mb-3">
+  <div class="input-group">
+    <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre de área"
+      value="{{ request.GET.nombre }}">
+  </div>
+  <div class="d-flex justify-content-end mt-2">
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a href="{% url 'horario_list' %}" class="btn btn-secondary ms-2">Limpiar</a>
+  </div>
+</form>
 <table class="table table-striped">
   <thead>
     <tr>

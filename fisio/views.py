@@ -47,6 +47,19 @@ class AreaListView(ListView):
     model = Area
     template_name = 'area_list.html'
     context_object_name = 'areas'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Capturar el parámetro de búsqueda del nombre del área
+        nombre_area = self.request.GET.get('nombre', '')
+
+        # Filtrar si el parámetro no está vacío
+        if nombre_area:
+            queryset = queryset.filter(nombre__icontains=nombre_area)
+
+        return queryset
 
 class AreaDetailView(DetailView):
     model = Area
@@ -75,6 +88,15 @@ class ServicioListView(ListView):
     template_name = 'servicio_list.html'
     context_object_name = 'servicios'
     paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        servicio = self.request.GET.get('servicio', '')
+
+        if servicio:
+            queryset = queryset.filter(nombre__icontains=servicio)
+
+        return queryset
 
 class ServicioDetailView(DetailView):
     model = Servicio
@@ -115,6 +137,21 @@ class PacienteListView(ListView):
     template_name = 'paciente_list.html'
     context_object_name = 'pacientes'
     paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        nombre = self.request.GET.get('nombre', '')
+        apellido = self.request.GET.get('apellido', '')
+        nrodocumento = self.request.GET.get('nrodocumento', '')
+
+        if nombre:
+            queryset = queryset.filter(nombre__icontains=nombre)
+        if apellido:
+            queryset = queryset.filter(apellido__icontains=apellido)
+        if nrodocumento:
+            queryset = queryset.filter(nrodocumento__icontains=nrodocumento)
+
+        return queryset
 
 class PacienteDetailView(DetailView):
     model = Paciente
@@ -168,6 +205,24 @@ class ProfesionalListView(ListView):
     template_name = 'profesional_list.html'
     context_object_name = 'profesionales'
     paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Capturar los parámetros de búsqueda
+        nombre = self.request.GET.get('nombre', '').strip()
+        apellidos = self.request.GET.get('apellidos', '').strip()
+        especialidad = self.request.GET.get('especialidad', '').strip()  # Cambié de responsable_area a especialidad para coincidir con el formulario
+
+        # Aplicar filtros si los campos no están vacíos
+        if nombre:
+            queryset = queryset.filter(nombre__icontains=nombre)
+        if apellidos:
+            queryset = queryset.filter(apellidos__icontains=apellidos)
+        if especialidad:
+            queryset = queryset.filter(responsable_area__nombre__icontains=especialidad)  # Cambié el filtro para acceder al nombre de la relación, si aplica.
+
+        return queryset
 
 class ProfesionalDetailView(DetailView):
     model = Profesional
@@ -441,6 +496,24 @@ class AgendamientoListView(ListView):
     context_object_name = 'agendamientos'
     paginate_by = 10
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Obtener parámetros de filtro
+        profesional = self.request.GET.get('profesional', '')
+        servicio = self.request.GET.get('servicio', '')
+        turno = self.request.GET.get('turno', '')
+
+        # Aplicar filtros
+        if profesional:
+            queryset = queryset.filter(profesional__nombre__icontains=profesional)  # Filtrar por nombre del profesional
+        if servicio:
+            queryset = queryset.filter(servicio__nombre__icontains=servicio)  # Filtrar por nombre del servicio
+        if turno:
+            queryset = queryset.filter(hora__icontains=turno)  # Filtrar por hora del turno
+
+        return queryset
+
 class AgendamientoDetailView(DetailView):
     model = Agendamiento
     template_name = 'agendamiento_detail.html'
@@ -569,7 +642,26 @@ class HorarioAtencionListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return HorarioAtencion.objects.filter(profesional__isnull=False)
+        # Obtener el queryset inicial
+        queryset = HorarioAtencion.objects.filter(profesional__isnull=False)
+
+        # Capturar parámetros de búsqueda de la URL
+        profesional = self.request.GET.get('profesional', '')
+        servicio = self.request.GET.get('servicio', '')
+        turno = self.request.GET.get('turno', '')
+
+        # Filtrar el queryset si los parámetros no están vacíos
+        if profesional:
+            queryset = queryset.filter(profesional__nombre__icontains=profesional)
+        if servicio:
+            queryset = queryset.filter(servicio__nombre__icontains=servicio)
+        if turno:
+            queryset = queryset.filter(idturno=turno)
+
+        # Añadir ordenamiento explícito
+        queryset = queryset.order_by('fecha', 'hora_inicio')
+
+        return queryset
 
 class HorarioAtencionDetailView(DetailView):
     model = HorarioAtencion

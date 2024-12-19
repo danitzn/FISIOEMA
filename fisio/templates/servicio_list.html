@@ -8,7 +8,17 @@
 <h1>Servicio Tarifas</h1>
 
 <a href="{% url 'servicio_form' %}" class="btn btn-success mb-3">Crear Nueva Servicio</a>
-
+<form method="get" class="mb-4">
+  <div class="row">
+      <div class="col-md-8">
+          <input type="text" name="servicio" class="form-control" placeholder="Buscar por servicio" value="{{ request.GET.servicio }}">
+      </div>
+      <div class="col-md-4">
+          <button type="submit" class="btn btn-primary">Filtrar</button>
+          <a href="{% url 'servicio_list' %}" class="btn btn-secondary">Limpiar</a>
+      </div>
+  </div>
+</form>
 <table class="table table-striped">
   <thead>
     <tr>

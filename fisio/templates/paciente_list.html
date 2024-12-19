@@ -6,7 +6,23 @@
     <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
     
     <a href="{% url 'paciente_create' %}" class="btn btn-primary mb-3">Nuevo Paciente</a>
-
+    <form method="get" class="mb-4">
+      <div class="row">
+          <div class="col-md-3">
+              <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="{{ request.GET.nombre }}">
+          </div>
+          <div class="col-md-3">
+              <input type="text" name="apellido" class="form-control" placeholder="Apellido" value="{{ request.GET.apellido }}">
+          </div>
+          <div class="col-md-3">
+              <input type="text" name="nrodocumento" class="form-control" placeholder="Número de Documento" value="{{ request.GET.nrodocumento }}">
+          </div>
+          <div class="col-md-3">
+              <button type="submit" class="btn btn-primary">Filtrar</button>
+              <a href="{% url 'paciente_list' %}" class="btn btn-secondary">Limpiar</a>
+          </div>
+      </div>
+  </form>
     <table class="table table-striped">
         <thead>
           <tr>
