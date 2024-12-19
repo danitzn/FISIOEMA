@@ -295,14 +295,7 @@ class HistoriaMedico(models.Model):
     def __str__(self):
         return f"Historia Médica de {self.paciente} - {self.descripcion}"
 
-class Informe(models.Model):
-    fecha_informe = models.DateField()
-    descripcion = models.TextField()
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
-    profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"Informe de {self.paciente} por {self.profesional} el {self.fecha_informe}"
  
 
     
@@ -476,6 +469,7 @@ class Consulta(models.Model):
         ('PP', 'Pago Parcial'),
     ]
     estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
+    estado_prof = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
     fecha = models.DateField()
@@ -528,20 +522,39 @@ class Sesiones(models.Model):
 
        
 class SesionDetalle (models.Model):
+    ESTADO_CHOICES = [
+        ('C', 'Cancelado'),
+        ('P', 'Pendiente'),
+        ('PP', 'Pago Parcial'),
+    ]
     sesion = models.ForeignKey(Sesiones, on_delete=models.CASCADE)
     numero_sesion = models.IntegerField()
     fecha = models.DateField(default = date.today)
     hora = models.TimeField(default = time)
     observaciones = models.TextField()
     estado = models.CharField(max_length=20, choices=[('A', 'Asistido'), ('N', 'No Asistido')])
-    estado_pago = models.CharField(max_length=20, choices=[
+    estado_prof = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
+    estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
+
+    def __str__(self):
+        return f"{self.fecha}, {self.hora}, {self.observaciones}, {self.estado}, {self.estado_pago}, {self.estado_prof}"
+
+class Informe(models.Model):
+    ESTADO_CHOICES = [
         ('C', 'Cancelado'),
         ('P', 'Pendiente'),
         ('PP', 'Pago Parcial'),
-    ])
+    ]
+    fecha_informe = models.DateField()
+    descripcion = models.TextField()
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
+    profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
+    estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
+    estado_prof = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
 
     def __str__(self):
-        return f"{self.fecha}, {self.hora}, {self.observaciones}, {self.estado}, {self.estado_pago}"
+        return f"Informe de {self.paciente} por {self.profesional} el {self.fecha_informe}"
+
 
 class FlujoCaja(models.Model):
     persona = models.CharField(max_length=20, null=True, blank=True)  # CI de paciente, profesional, o ninguno
