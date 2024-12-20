@@ -1,0 +1,91 @@
+{% extends "base_administrativo.html" %}
+{% block content %}
+<div class="container-fluid" style="margin-left: 0px;">
+    <h2>Cobranzas</h2>
+    
+    <form method="get" class="mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-2">
+                <label for="paciente" class="form-label small mb-1">Paciente:</label>
+                <select id="paciente" name="paciente" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    {% for paciente in pacientes %}
+                    <option value="{{ paciente.id }}" {% if filtros.paciente_id == paciente.id|stringformat:"s" %}selected{% endif %}>
+                        {{ paciente.nombre }} {{ paciente.apellido }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-2">
+                <label for="fecha_desde" class="form-label small mb-1">Fecha desde:</label>
+                <input type="date" id="fecha_desde" name="fecha_desde" class="form-control form-control-sm">
+            </div>
+            <div class="col-2">
+                <label for="fecha_hasta" class="form-label small mb-1">Fecha hasta:</label>
+                <input type="date" id="fecha_hasta" name="fecha_hasta" class="form-control form-control-sm">
+            </div>
+            <div class="col-2">
+                <label for="servicio" class="form-label small mb-1">Servicio:</label>
+                <select id="servicio" name="servicio" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    {% for servicio in servicios %}
+                    <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto ms-2">
+                <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+            </div>
+        </div>
+    </form>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Servicio</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Seleccionar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cobro in cobros %}
+                    <tr>
+                        <td>{{ cobro.paciente }}</td>
+                        <td>{{ cobro.tipo }}</td>
+                        <td>{{ cobro.fecha }}</td>
+                        <td>{{ cobro.servicio }}</td>
+                        <td>{{ cobro.descripcion }}</td>
+                        <td>{{ cobro.monto }}</td>
+                        <td><input type="checkbox" name="seleccionados" value="{{ cobro.id }}"></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No se encontraron resultados</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <button id="generar" class="btn btn-success btn-sm float-end" disabled>Generar</button>
+    </form>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('input[name="seleccionados"]');
+    const generarBtn = document.getElementById('generar');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            generarBtn.disabled = !Array.from(checkboxes).some(chk => chk.checked);
+        });
+    });
+</script>
+{% endblock %}

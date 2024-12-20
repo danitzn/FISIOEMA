@@ -1,0 +1,56 @@
+
+{% extends "base_administrativo.html" %}
+{% block content %}
+<h2>Resumen General</h2>
+<form method="get" action="">
+    <label for="profesional">Profesional:</label>
+    <select id="profesional" name="profesional">
+        <option value="">Todos</option>
+        {% for profesional in profesionales %}
+        <option value="{{ profesional.id }}">{{ profesional.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="fecha_desde">Fecha desde:</label>
+    <input type="date" id="fecha_desde" name="fecha_desde">
+
+    <label for="fecha_hasta">Fecha hasta:</label>
+    <input type="date" id="fecha_hasta" name="fecha_hasta">
+
+    <label for="servicio">Servicio:</label>
+    <select id="servicio" name="servicio">
+        <option value="">Todos</option>
+        {% for servicio in servicios %}
+        <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Buscar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Profesional</th>
+            <th>Servicio</th>
+            <th>Total Consultas Atendidas</th>
+            <th>Utilidad</th>
+            <th>% Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for resumen in resumenes %}
+        <tr>
+            <td>{{ resumen.profesional }}</td>
+            <td>{{ resumen.servicio }}</td>
+            <td>{{ resumen.total_consultas }}</td>
+            <td>{{ resumen.utilidad }}</td>
+            <td>{{ resumen.porcentaje_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p>Total Consultas: {{ total_consultas }}</p>
+<p>Monto Total: {{ monto_total }}</p>
+{% endblock %}

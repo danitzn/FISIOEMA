@@ -3,10 +3,10 @@ from django import views
 from django.urls import path
 from django.contrib import admin
 from fisio.views import (
-    AgendamientoCreateProfView, AgendamientoCreateView, AgendamientoDeleteProfView, AgendamientoDeleteView, AgendamientoDetailProfView, AgendamientoDetailView, AgendamientoListProfView, AgendamientoListView, AgendamientoUpdateProfView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailProfView, AreaDetailView, AreaListProfView, AreaListView, AreaUpdateView, ConfiguracionView, ConfirmacionAgendamientoProfView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailPacView, HorarioAtencionDetailProfView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListPacView, HorarioAtencionListProfView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteDetailPacView, PacienteDetailProfView, PacienteListProfView, PacienteListView, PacienteDetailView, PacienteCreateView, PacienteUpdateProfView,
-    PacienteUpdateView, PacienteDeleteView, ProfesionalDetailPacView, ProfesionalDetailProfView, ProfesionalListPacView, ProfesionalListProfView,
+    AgendamientoCreateProfView, AgendamientoCreateView, AgendamientoDeleteProfView, AgendamientoDeleteView, AgendamientoDetailProfView, AgendamientoDetailView, AgendamientoListProfView, AgendamientoListView, AgendamientoUpdateProfView, AgendamientoUpdateView, AreaCreateView, AreaDeleteView, AreaDetailProfView, AreaDetailView, AreaListProfView, AreaListView, AreaUpdateView, CobranzasView, ConfirmacionAgendamientoProfView, ConfirmacionAgendamientoView, FlujoCajaListView, HorarioAtencionCreateView, HorarioAtencionDetailPacView, HorarioAtencionDetailProfView, HorarioAtencionDetailView, HorarioAtencionDeleteView, HorarioAtencionListPacView, HorarioAtencionListProfView, HorarioAtencionListView, HorarioAtencionUpdateView, PacienteDetailPacView, PacienteDetailProfView, PacienteListProfView, PacienteListView, PacienteDetailView, PacienteCreateView, PacienteUpdateProfView,
+    PacienteUpdateView, PacienteDeleteView, PagosView, ProfesionalDetailPacView, ProfesionalDetailProfView, ProfesionalListPacView, ProfesionalListProfView,
     ProfesionalListView, ProfesionalDetailView, ProfesionalCreateView, 
-    ProfesionalUpdateView, ProfesionalDeleteView, ReporteAgendamientosView, ResponsableCreateView, ResponsableDeleteView, ResponsableDetailView, ResponsableListView, ResponsableUpdateView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home, obtener_sesiones,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
+    ProfesionalUpdateView, ProfesionalDeleteView, ReporteAgendamientosView, ResponsableCreateView, ResponsableDeleteView, ResponsableDetailView, ResponsableListView, ResponsableUpdateView, ResumenGeneralView, ServicioCreateView, ServicioDeleteView, ServicioDetailPacView, ServicioDetailView, ServicioListPacView, ServicioListView, ServicioUpdateView, buscar_consultas_por_ci, cobrar_consulta, dashboard_view, generar_consulta, home, obtener_sesiones,registro,login_view, calendario, reporte_consultas, generar_informe_pdf
 )
 
 urlpatterns = [
@@ -129,6 +129,16 @@ urlpatterns = [
     path('responsable/<int:pk>/', ResponsableDetailView.as_view(), name='responsable_detail'),
     path('responsables/', ResponsableListView.as_view(), name='responsable_list'), 
 
-    #configuracion
-    path('configuracion/', ConfiguracionView.as_view(), name='configuracion'),
+     path("cobranzas/", CobranzasView.as_view(), name="cobranzas"),
+    
+    
+    # Pagos al Profesional
+    path("pagos_profesionales/", PagosView.as_view(), name="pagos_profesionales"),
+   
+    
+    # Resumen General
+    path("resumen_general/", ResumenGeneralView.as_view(), name="resumen_general"),
+    
+    # Flujo de Caja
+
 ]
