@@ -120,7 +120,7 @@ class Servicio(models.Model):
 class Profesional(models.Model):
     nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
-    apellidos = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
     registro_profesional = models.CharField(max_length=40)
     fecha_nacimiento = models.DateField()
     celular = models.CharField(max_length=20)
@@ -131,10 +131,10 @@ class Profesional(models.Model):
     responsable_area = models.ForeignKey('Area', on_delete=models.CASCADE, related_name='profesionales', null=True, blank=True)
     
     def __str__(self):
-        return f"{self.nombre} {self.apellidos}"
+        return f"{self.nombre} {self.apellido}"
     
     class Meta:
-        ordering = ['apellidos', 'nombre']
+        ordering = ['apellido', 'nombre']
 
     def clean(self):
         """ Método clean para validaciones personalizadas """

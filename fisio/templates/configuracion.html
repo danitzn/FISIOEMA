@@ -1,0 +1,11 @@
+{% extends 'base_administrativo.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Configuración de tu perfil</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+</div>
+{% endblock %}

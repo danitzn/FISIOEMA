@@ -12,7 +12,7 @@
           <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="{{ request.GET.nombre }}">
       </div>
       <div class="col-md-3">
-          <input type="text" name="apellidos" class="form-control" placeholder="Apellidos" value="{{ request.GET.apellidos }}">
+          <input type="text" name="apellido" class="form-control" placeholder="apellido" value="{{ request.GET.apellido }}">
       </div>
       <div class="col-md-3">
         <input type="text" name="especialidad" class="form-control" placeholder="Especialidad" value="{{ request.GET.especialidad }}">
@@ -27,7 +27,7 @@
   <thead>
     <tr>
       <th>Nombre</th>
-      <th>Apellidos</th>
+      <th>apellido</th>
       <th>Documento</th>
       <th>Registro Profesional</th>
       <th>Especialidad</th>
@@ -38,7 +38,7 @@
     {% for profesional in object_list %}
     <tr>
       <td>{{ profesional.nombre }}</td>
-      <td>{{ profesional.apellidos }}</td>
+      <td>{{ profesional.apellido }}</td>
       <td>{{ profesional.nrodocumento }}</td>
       <td>{{ profesional.registro_profesional }}</td>
       <td>{{ profesional.responsable_area}}</td>

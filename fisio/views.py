@@ -6,11 +6,12 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Count
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
 from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, Sesiones
-from .forms import AgendamientoForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
+from .forms import AgendamientoForm, ConfiguracionForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
 from django.core.exceptions import ValidationError
@@ -23,6 +24,8 @@ from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
 from django.utils import timezone 
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
 
 
 #logoutViews
@@ -35,12 +38,12 @@ def logout_view(request):
 class AreaListProfView(ListView):
     model = Area
     template_name = 'area_list_prof.html'
-    context_object_name = 'areasp'
+    context_object_name = 'areas'
 
 class AreaDetailProfView(DetailView):
     model = Area
     template_name = 'area_detail_prof.html'
-    context_object_name = 'areap'
+    context_object_name = 'areas'
 
 #areas y servicios - Perfil Admin
 class AreaListView(ListView):
@@ -211,14 +214,14 @@ class ProfesionalListView(ListView):
 
         # Capturar los parámetros de búsqueda
         nombre = self.request.GET.get('nombre', '').strip()
-        apellidos = self.request.GET.get('apellidos', '').strip()
+        apellido = self.request.GET.get('apellido', '').strip()
         especialidad = self.request.GET.get('especialidad', '').strip()  # Cambié de responsable_area a especialidad para coincidir con el formulario
 
         # Aplicar filtros si los campos no están vacíos
         if nombre:
             queryset = queryset.filter(nombre__icontains=nombre)
-        if apellidos:
-            queryset = queryset.filter(apellidos__icontains=apellidos)
+        if apellido:
+            queryset = queryset.filter(apellido__icontains=apellido)
         if especialidad:
             queryset = queryset.filter(responsable_area__nombre__icontains=especialidad)  # Cambié el filtro para acceder al nombre de la relación, si aplica.
 
@@ -1112,3 +1115,40 @@ def sesiones_view(request):
         form = SesionesForm()
     
     return render(request, 'tu_template.html', {'Sesionesform': form})
+@method_decorator(login_required, name='dispatch')
+class ConfiguracionView(View):
+    def get(self, request):
+        user = request.user
+
+        # Determina el perfil y el formulario adecuado
+        if hasattr(user, 'profesional'):
+            perfil = user.profesional
+            form = ProfesionalForm(instance=perfil)
+        elif hasattr(user, 'paciente'):
+            perfil = user.paciente
+            form = PacienteForm(instance=perfil)
+        else:
+            perfil = user
+            form = ConfiguracionForm(instance=perfil)
+
+        return render(request, 'configuracion.html', {'form': form, 'perfil': perfil})
+
+    def post(self, request):
+        user = request.user
+
+        # Determina el perfil y el formulario adecuado
+        if hasattr(user, 'profesional'):
+            perfil = user.profesional
+            form = ProfesionalForm(request.POST, instance=perfil)
+        elif hasattr(user, 'paciente'):
+            perfil = user.paciente
+            form = PacienteForm(request.POST, instance=perfil)
+        else:
+            perfil = user
+            form = ConfiguracionForm(request.POST, instance=perfil)
+
+        if form.is_valid():
+            form.save()
+            return redirect('configuracion')
+
+        return render(request, 'configuracion.html', {'form': form, 'perfil': perfil})

@@ -111,7 +111,7 @@ class AgendamientoForm(forms.ModelForm):
 class ProfesionalForm(forms.ModelForm):
     class Meta:
         model = Profesional
-        fields = ['nrodocumento', 'nombre', 'apellidos', 'fecha_nacimiento', 'celular', 'correo', 'sexo', 'responsable_area', 'activo']
+        fields = ['nrodocumento', 'nombre', 'apellido', 'fecha_nacimiento', 'celular', 'correo', 'sexo', 'responsable_area', 'activo']
         widgets = {
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
@@ -160,3 +160,23 @@ class InformeForm(forms.ModelForm):
         model = Informe
         fields = ['paciente', 'profesional', 'fecha_informe', 'descripcion']
 
+class ConfiguracionForm(forms.ModelForm):
+    class Meta:
+        model = None
+        fields = [] 
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        
+        if instance:
+            if isinstance(instance, Profesional):
+                self._meta.model = Profesional
+                self._meta.fields = ['nombre', 'apellido', 'fecha_nacimiento', 'celular', 'correo', 'sexo']
+            elif isinstance(instance, Paciente):
+                self._meta.model = Paciente
+                self._meta.fields = ['nombre', 'apellido', 'fecha_nacimiento', 'celular', 'correo', 'sexo']
+            else:
+                self._meta.model = User
+                self._meta.fields = ['first_name', 'last_name', 'email']
+        
+        super().__init__(*args, **kwargs)
