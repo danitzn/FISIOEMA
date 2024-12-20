@@ -155,5 +155,5 @@ class SesionDetalleForm(forms.ModelForm):
 class InformeForm(forms.ModelForm):
     class Meta:
         model = Informe
-        fields = ['paciente', 'profesional', 'fecha_informe', 'descripcion']
+        fields = ['paciente', 'profesional', 'fecha_informe', 'descripcion', 'servicio']
 

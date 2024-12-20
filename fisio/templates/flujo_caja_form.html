@@ -1,0 +1,26 @@
+{% extends "base_administrativo.html" %}
+{% block content %}
+<h2>Flujo de Caja</h2>
+<form method="post" action="">
+    {% csrf_token %}
+    <label for="fecha">Fecha de Operación:</label>
+    <input type="date" id="fecha" name="fecha" value="{{ fecha }}" readonly>
+
+    <label for="persona">Persona:</label>
+    <input type="text" id="persona" name="persona" value="{{ persona }}" readonly>
+
+    <label for="tipo_operacion">Tipo de Operación:</label>
+    <input type="text" id="tipo_operacion" name="tipo_operacion" value="Recibo" readonly>
+
+    <label for="monto">Monto:</label>
+    <input type="text" id="monto" name="monto" value="{{ monto }}" readonly>
+
+    <label for="tipo_pago">Tipo de Pago:</label>
+    <select id="tipo_pago" name="tipo_pago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Transferencia">Transferencia</option>
+    </select>
+
+    <button type="submit">Confirmar</button>
+</form>
+{% endblock %}

@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container mt-5">
     <div class="card p-4 shadow-sm">
-        <h2 class="text-primary">{{ object.nombre }} {{ object.apellidos }}</h2>
+        <h2 class="text-primary">{{ object.nombre }} {{ object.apellido }}</h2>
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><strong>Fecha de Nacimiento:</strong> {{ object.fecha_nacimiento|date:"d/m/Y" }}</li>
             <li class="list-group-item"><strong>Celular:</strong> {{ object.celular }}</li>

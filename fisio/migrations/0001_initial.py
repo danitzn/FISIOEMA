@@ -203,7 +203,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nrodocumento', models.CharField(max_length=20, unique=True)),
                 ('nombre', models.CharField(max_length=50)),
-                ('apellidos', models.CharField(max_length=50)),
+                ('apellido', models.CharField(max_length=50)),
                 ('fecha_nacimiento', models.DateField()),
                 ('celular', models.CharField(max_length=20)),
                 ('correo', models.EmailField(max_length=254)),
@@ -213,7 +213,7 @@ class Migration(migrations.Migration):
                 ('responsable_area', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='profesionales', to='fisio.area')),
             ],
             options={
-                'ordering': ['apellidos', 'nombre'],
+                'ordering': ['apellido', 'nombre'],
             },
         ),
         migrations.AddField(

@@ -120,7 +120,7 @@ class Servicio(models.Model):
 class Profesional(models.Model):
     nrodocumento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
-    apellidos = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
     registro_profesional = models.CharField(max_length=40)
     fecha_nacimiento = models.DateField()
     celular = models.CharField(max_length=20)
@@ -131,10 +131,10 @@ class Profesional(models.Model):
     responsable_area = models.ForeignKey('Area', on_delete=models.CASCADE, related_name='profesionales', null=True, blank=True)
     
     def __str__(self):
-        return f"{self.nombre} {self.apellidos}"
+        return f"{self.nombre} {self.apellido}"
     
     class Meta:
-        ordering = ['apellidos', 'nombre']
+        ordering = ['apellido', 'nombre']
 
     def clean(self):
         """ Método clean para validaciones personalizadas """
@@ -296,16 +296,6 @@ class HistoriaMedico(models.Model):
         return f"Historia Médica de {self.paciente} - {self.descripcion}"
 
 
- 
-
-    
-
-class TipoInformeArea(models.Model):
-    nombre = models.CharField(max_length=100)
-    informe = models.ForeignKey(Informe, on_delete=models.CASCADE, related_name='tipos_informe')
-
-    def __str__(self):
-        return self.nombre
 
 class TipoProfesionalArea(models.Model):
     nombre = models.CharField(max_length=100)
@@ -315,17 +305,12 @@ class TipoProfesionalArea(models.Model):
         return self.nombre
 
 
-    def __str__(self):
-        return self.nombre
-
 class Cobro(models.Model):
     # tarifa = models.ForeignKey(Tarifa, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=100)
     fecha = models.DateField()
 
 
-    def __str__(self):
-        return f"Cobro de {self.tarifa.nombre} - {self.fecha}"
 
 class CobroSeguroMedico(models.Model):
     cobro = models.ForeignKey(Cobro, on_delete=models.CASCADE)
@@ -536,6 +521,8 @@ class SesionDetalle (models.Model):
     estado_prof = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
     estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
 
+    db_table = "sesiondetalle"
+
     def __str__(self):
         return f"{self.fecha}, {self.hora}, {self.observaciones}, {self.estado}, {self.estado_pago}, {self.estado_prof}"
 
@@ -547,8 +534,9 @@ class Informe(models.Model):
     ]
     fecha_informe = models.DateField()
     descripcion = models.TextField()
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     profesional = models.ForeignKey(Profesional, on_delete=models.CASCADE)
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
     estado_pago = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
     estado_prof = models.CharField(max_length=2, choices=ESTADO_CHOICES, default='P')
 

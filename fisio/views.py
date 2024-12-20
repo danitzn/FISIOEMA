@@ -1,15 +1,15 @@
 # views.py
-import json
-import os
-import csv
+import json, os, csv
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Count
+from django.db import connection, transaction
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from reportlab.lib.utils import ImageReader
 from FISIOEMA import settings
-from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, Sesiones
+from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, SesionDetalle, Sesiones
 from .forms import AgendamientoForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroForm
@@ -22,6 +22,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
 from django.utils import timezone 
+# from .utils import generate_pdf
 from django.urls import reverse_lazy
 
 
@@ -1020,3 +1021,470 @@ def sesiones_view(request):
         form = SesionesForm()
     
     return render(request, 'tu_template.html', {'Sesionesform': form})
+
+
+# -------------------- Cobranzas View --------------------
+from django.db import connection, transaction
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import Paciente, Servicio, SesionDetalle, Consulta, Informe, FlujoCaja
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+
+class CobranzasView(View):
+    template_name = "cobranzas.html"
+
+    def get(self, request):
+        paciente_id = request.GET.get("paciente")
+        fecha_desde = request.GET.get("fecha_desde")
+        fecha_hasta = request.GET.get("fecha_hasta")
+        servicio_id = request.GET.get("servicio")
+
+        # Parámetros para la consulta
+        params = []
+        filtros = ""
+
+        if paciente_id:
+            filtros += " AND p.id = %s"
+            params.append(paciente_id)
+
+        if fecha_desde and fecha_hasta:
+            filtros += " AND {table}.fecha BETWEEN %s AND %s"
+            params.extend([fecha_desde, fecha_hasta])
+
+        if servicio_id:
+            filtros += " AND ser.id = %s"
+            params.append(servicio_id)
+
+        sql = f"""
+        SELECT 
+            c.fecha AS fecha,
+            c.diagnostico AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS paciente,
+            ser.monto AS monto,
+            'Consulta' as tipo
+        FROM 
+            fisio_consulta c
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = c.servicio_id
+        INNER JOIN 
+            fisio_paciente p ON p.id = c.paciente_id
+        WHERE 
+            c.estado_prof IN ('P', 'Pendiente')
+            {filtros.format(table='c')}
+        
+        UNION ALL
+        
+        SELECT 
+            i.fecha_informe AS fecha,
+            i.descripcion AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS paciente,
+            ser.monto AS monto,
+            'Informe' as tipo
+        FROM 
+            fisio_informe i
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = i.servicio_id
+        INNER JOIN 
+            fisio_paciente p ON p.id = i.paciente_id
+        WHERE 
+            i.estado_prof IN ('P', 'Pendiente')
+            {filtros.replace('fecha', 'fecha_informe').format(table='i')}
+        
+        UNION ALL
+        
+        SELECT 
+            sd.fecha AS fecha,
+            sd.observaciones AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS paciente,
+            ser.monto AS monto,
+            'Sesión' as tipo
+        FROM 
+            fisio_sesiondetalle sd
+        INNER JOIN 
+            fisio_sesiones s ON s.id = sd.sesion_id
+        INNER JOIN 
+            fisio_consulta c ON c.id = s.consulta_id
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = s.servicio_id
+        INNER JOIN 
+            fisio_paciente p ON p.id = s.paciente_id
+        WHERE 
+            sd.estado_prof IN ('P', 'Pendiente')
+            {filtros.format(table='sd')}
+        ORDER BY fecha DESC
+        """
+
+        # Ejecutar la consulta SQL
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params * 3)  # Multiplicamos los parámetros por 3 debido al UNION ALL
+            resultados = cursor.fetchall()
+
+        # Convertir los resultados a un diccionario
+        cobros = [
+            {
+                'id': idx,
+                'fecha': row[0],
+                'descripcion': row[1],
+                'servicio': row[2],
+                'paciente': row[3],
+                'monto': row[4],
+                'tipo': row[5]
+            }
+            for idx, row in enumerate(resultados, start=1)
+        ]
+
+        pacientes = Paciente.objects.all()
+        servicios = Servicio.objects.all()
+
+        context = {
+            "cobros": cobros, 
+            "pacientes": pacientes, 
+            "servicios": servicios,
+            "filtros": {
+                "paciente_id": paciente_id,
+                "fecha_desde": fecha_desde,
+                "fecha_hasta": fecha_hasta,
+                "servicio_id": servicio_id
+            }
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        seleccionados = request.POST.getlist('seleccionados')
+        
+        if seleccionados:
+            with transaction.atomic():
+                # Convertir IDs a enteros
+                seleccionados = [int(id) for id in seleccionados]
+
+                # Crear la lista de placeholders para el IN
+                placeholders = ','.join(['?' for _ in seleccionados])
+
+                # Ejecutar la consulta SQL para obtener los cobros seleccionados
+                sql = f"""
+                SELECT 
+                    c.id as id,
+                    c.fecha as fecha,
+                    c.diagnostico as descripcion,
+                    ser.nombre as servicio,
+                    p.nombre || ' ' || p.apellido as paciente,
+                    ser.monto as monto,
+                    'Consulta' as tipo
+                FROM fisio_consulta c
+                INNER JOIN fisio_servicio ser ON ser.id = c.servicio_id
+                INNER JOIN fisio_paciente p ON p.id = c.paciente_id
+                WHERE c.id IN ({placeholders})
+
+                UNION ALL
+
+                SELECT 
+                    i.id as id,
+                    i.fecha_informe as fecha,
+                    i.descripcion as descripcion,
+                    ser.nombre as servicio,
+                    p.nombre || ' ' || p.apellido as paciente,
+                    ser.monto as monto,
+                    'Informe' as tipo
+                FROM fisio_informe i
+                INNER JOIN fisio_servicio ser ON ser.id = i.servicio_id
+                INNER JOIN fisio_paciente p ON p.id = i.paciente_id
+                WHERE i.id IN ({placeholders})
+
+                UNION ALL
+
+                SELECT 
+                    sd.id as id,
+                    sd.fecha as fecha,
+                    sd.observaciones as descripcion,
+                    ser.nombre as servicio,
+                    p.nombre || ' ' || p.apellido as paciente,
+                    ser.monto as monto,
+                    'Sesión' as tipo
+                FROM fisio_sesiondetalle sd
+                INNER JOIN fisio_sesiones s ON s.id = sd.sesion_id
+                INNER JOIN fisio_servicio ser ON ser.id = s.servicio_id
+                INNER JOIN fisio_paciente p ON p.id = s.paciente_id
+                WHERE sd.id IN ({placeholders})
+                """
+
+                with connection.cursor() as cursor:
+                    # Multiplicamos seleccionados por 3 debido a los tres IN en la consulta
+                    cursor.execute(sql, seleccionados * 3)
+                    resultados = cursor.fetchall()
+
+                cobros_seleccionados = [
+                    {
+                        'id': row[0],
+                        'fecha': row[1],
+                        'descripcion': row[2],
+                        'servicio': row[3],
+                        'paciente': row[4],
+                        'monto': row[5],
+                        'tipo': row[6]
+                    }
+                    for row in resultados
+                ]
+
+                # Actualizar el estado a 'Cancelado'
+                SesionDetalle.objects.filter(id__in=seleccionados).update(estado_pago='C')
+                Consulta.objects.filter(id__in=seleccionados).update(estado_pago='C')
+                Informe.objects.filter(id__in=seleccionados).update(estado_pago='C')
+
+                # Generar PDF
+                response = HttpResponse(content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="cobros_paciente.pdf"'
+                p = canvas.Canvas(response)
+                p.drawString(100, 800, "Cobros al Paciente")
+                y = 750
+                for cobro in cobros_seleccionados:
+                    p.drawString(100, y, f"Fecha: {cobro['fecha']}, Descripción: {cobro['descripcion']}, Servicio: {cobro['servicio']}, Monto: {cobro['monto']}")
+                    y -= 20
+                p.showPage()
+                p.save()
+
+                # Registrar operación en flujo de caja
+                for cobro in cobros_seleccionados:
+                    FlujoCaja.objects.create(
+                        concepto='Entrada de dinero',
+                        monto=cobro['monto'],
+                        fecha=cobro['fecha'],
+                        descripcion=f"Cobro al paciente {cobro['paciente']} por {cobro['descripcion']}"
+                    )
+
+                return response
+
+        return redirect('cobranzas')
+
+# -------------------- Pagos View --------------------
+
+class PagosView(View):
+    template_name = "pagos.html"
+
+    def get(self, request):
+        profesional_id = request.GET.get("profesional")
+        fecha_desde = request.GET.get("fecha_desde")
+        fecha_hasta = request.GET.get("fecha_hasta")
+        servicio_id = request.GET.get("servicio")
+
+        # Parámetros para la consulta
+        params = []
+        filtros = ""
+
+        if profesional_id:
+            filtros += " AND p.id = %s"
+            params.append(profesional_id)
+
+        if fecha_desde and fecha_hasta:
+            filtros += " AND {table}.fecha BETWEEN %s AND %s"
+            params.extend([fecha_desde, fecha_hasta])
+
+        if servicio_id:
+            filtros += " AND ser.id = %s"
+            params.append(servicio_id)
+
+        sql = f"""
+        SELECT 
+            c.fecha AS fecha,
+            c.diagnostico AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto,
+            'Consulta' as tipo
+        FROM 
+            fisio_consulta c
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = c.servicio_id
+        INNER JOIN 
+            fisio_profesional p ON p.id = c.profesional_id
+        WHERE 
+            c.estado_prof IN ('P', 'Pendiente')
+            {filtros.format(table='c')}
+        
+        UNION ALL
+        
+        SELECT 
+            i.fecha_informe AS fecha,
+            i.descripcion AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto,
+            'Informe' as tipo
+        FROM 
+            fisio_informe i
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = i.servicio_id
+        INNER JOIN 
+            fisio_profesional p ON p.id = i.profesional_id
+        WHERE 
+            i.estado_prof IN ('P', 'Pendiente')
+            {filtros.replace('fecha', 'fecha_informe').format(table='i')}
+        
+        UNION ALL
+        
+        SELECT 
+            sd.fecha AS fecha,
+            sd.observaciones AS descripcion,
+            ser.nombre AS servicio,
+            p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto,
+            'Sesión' as tipo
+        FROM 
+            fisio_sesiondetalle sd
+        INNER JOIN 
+            fisio_sesiones s ON s.id = sd.sesion_id
+        INNER JOIN 
+            fisio_consulta c ON c.id = s.consulta_id
+        INNER JOIN 
+            fisio_servicio ser ON ser.id = s.servicio_id
+        INNER JOIN 
+            fisio_profesional p ON p.id = c.profesional_id
+        WHERE 
+            sd.estado_prof IN ('P', 'Pendiente')
+            {filtros.format(table='sd')}
+        ORDER BY fecha DESC
+        """
+
+        # Ejecutar la consulta SQL
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params * 3)  # Multiplicamos los parámetros por 3 debido al UNION ALL
+            resultados = cursor.fetchall()
+
+        # Convertir los resultados a un diccionario
+        pagos = [
+            {
+                'fecha': row[0],
+                'descripcion': row[1],
+                'servicio': row[2],
+                'profesional': row[3],
+                'monto': row[4],
+                'tipo': row[5]
+            }
+            for row in resultados
+        ]
+
+        profesionales = Profesional.objects.all()
+        servicios = Servicio.objects.all()
+
+        context = {
+            "pagos": pagos, 
+            "profesionales": profesionales, 
+            "servicios": servicios,
+            "filtros": {
+                "profesional_id": profesional_id,
+                "fecha_desde": fecha_desde,
+                "fecha_hasta": fecha_hasta,
+                "servicio_id": servicio_id
+            }
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        seleccionados = request.POST.getlist('seleccionados')
+        
+        if seleccionados:
+            with transaction.atomic():
+                # Actualizar el estado a 'Cancelado'
+                SesionDetalle.objects.filter(id__in=seleccionados).update(estado_prof='C')
+                Consulta.objects.filter(id__in=seleccionados).update(estado_prof='C')
+                Informe.objects.filter(id__in=seleccionados).update(estado_prof='C')
+
+                # Generar PDF
+                response = HttpResponse(content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="pagos_profesional.pdf"'
+                p = canvas.Canvas(response)
+                p.drawString(100, 800, "Pagos al Profesional")
+                y = 750
+                for pago in seleccionados:
+                    p.drawString(100, y, f"Fecha: {pago['fecha']}, Descripción: {pago['descripcion']}, Servicio: {pago['servicio']}, Monto: {pago['monto']}")
+                    y -= 20
+                p.showPage()
+                p.save()
+
+                # Registrar operación en flujo de caja
+                for pago in seleccionados:
+                    FlujoCaja.objects.create(
+                        concepto='Salida de dinero',
+                        monto=pago['monto'],
+                        fecha=pago['fecha'],
+                        descripcion=f"Pago al profesional {pago['profesional']} por {pago['descripcion']}"
+                    )
+
+                return response
+
+        return redirect('pagos_profesionales')
+
+
+
+# -------------------- Resumen General View --------------------
+class ResumenGeneralView(View):
+    template_name = "resumen_gral.html"
+
+    def get(self, request):
+        profesionales = Consulta.objects.values("profesional__nombre", "profesional__apellido").distinct()
+        servicios = Servicio.objects.all()
+        return render(request, self.template_name, {"profesionales": profesionales, "servicios": servicios})
+
+    def post(self, request):
+        profesional_id = request.POST.get("profesional")
+        fecha_desde = request.POST.get("fecha_desde")
+        fecha_hasta = request.POST.get("fecha_hasta")
+        servicio_id = request.POST.get("servicio")
+
+        resumen = Consulta.objects.filter(estado_pago="C", estado_prof="C")
+
+        if profesional_id:
+            resumen = resumen.filter(profesional__id=profesional_id)
+        if fecha_desde and fecha_hasta:
+            resumen = resumen.filter(fecha__range=[fecha_desde, fecha_hasta])
+        if servicio_id:
+            resumen = resumen.filter(servicio__id=servicio_id)
+
+        resumen = resumen.values("profesional__nombre", "servicio__nombre").annotate(
+            total_consultas=Sum("id"),
+            utilidad=Sum("servicio__monto") * 0.3,
+        )
+
+        return render(request, self.template_name, {"resumen": resumen})
+
+# -------------------- Flujo de Caja View --------------------
+class FlujoCajaView(View):
+    template_name = "flujo_caja_form.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        persona = request.POST.get("persona")
+        monto = request.POST.get("monto")
+        tipo_pago = request.POST.get("tipo_pago")
+
+        FlujoCaja.objects.create(
+            persona=persona,
+            fecha=request.POST.get("fecha"),
+            monto=monto,
+            tipo_operacion="R",  # Recibo
+            medio_pago=tipo_pago,
+        )
+
+        # Actualizar estados de las consultas seleccionadas
+        consulta_ids = request.POST.getlist("consulta_ids")
+        Consulta.objects.filter(id__in=consulta_ids).update(estado_pago="C")
+
+        # Generar PDF
+        pdf_data = {
+            "fecha_operacion": request.POST.get("fecha"),
+            "persona": persona,
+            "concepto": "Recibo",
+            "monto": monto,
+            "tipo_pago": tipo_pago,
+        }
+        # pdf = generate_pdf(pdf_data)
+
+        # return HttpResponse(pdf, content_type="application/pdf")
+
