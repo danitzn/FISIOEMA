@@ -22,8 +22,10 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
 from django.utils import timezone 
-# from .utils import generate_pdf
 from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 
@@ -1118,12 +1120,7 @@ def sesiones_view(request):
 
 
 # -------------------- Cobranzas View --------------------
-from django.db import connection, transaction
-from django.shortcuts import render, redirect
-from django.views import View
-from .models import Paciente, Servicio, SesionDetalle, Consulta, Informe, FlujoCaja
-from django.http import HttpResponse
-from reportlab.pdfgen import canvas
+
 
 class CobranzasView(View):
     template_name = "cobranzas.html"
@@ -1233,11 +1230,13 @@ class CobranzasView(View):
 
         pacientes = Paciente.objects.all()
         servicios = Servicio.objects.all()
+        medios_pago = ["Efectivo", "Tarjeta de Crédito", "Tarjeta de Débito", "Transferencia Bancaria"]
 
         context = {
             "cobros": cobros, 
             "pacientes": pacientes, 
             "servicios": servicios,
+            "medios_pago": medios_pago,
             "filtros": {
                 "paciente_id": paciente_id,
                 "fecha_desde": fecha_desde,
@@ -1250,8 +1249,9 @@ class CobranzasView(View):
 
     def post(self, request):
         seleccionados = request.POST.getlist('seleccionados')
-        
-        if seleccionados:
+        medio_pago = request.POST.get('medio_pago')
+
+        if seleccionados and medio_pago:
             with transaction.atomic():
                 # Convertir IDs a enteros
                 seleccionados = [int(id) for id in seleccionados]
@@ -1324,6 +1324,19 @@ class CobranzasView(View):
                     for row in resultados
                 ]
 
+                # Calcular el monto total
+                monto_total = sum(cobro['monto'] for cobro in cobros_seleccionados)
+
+                # Registrar operación en flujo de caja
+                FlujoCaja.objects.create(
+                    persona=cobros_seleccionados[0]['paciente'],
+                    monto=monto_total,
+                    tipo_operacion='Recibo (Entrada)',
+                    medio_pago=medio_pago,
+                    fecha=cobros_seleccionados[0]['fecha'],
+                    descripcion=f"Cobro al paciente {cobros_seleccionados[0]['paciente']} por servicios"
+                )
+
                 # Actualizar el estado a 'Cancelado'
                 SesionDetalle.objects.filter(id__in=seleccionados).update(estado_pago='C')
                 Consulta.objects.filter(id__in=seleccionados).update(estado_pago='C')
@@ -1341,18 +1354,10 @@ class CobranzasView(View):
                 p.showPage()
                 p.save()
 
-                # Registrar operación en flujo de caja
-                for cobro in cobros_seleccionados:
-                    FlujoCaja.objects.create(
-                        concepto='Entrada de dinero',
-                        monto=cobro['monto'],
-                        fecha=cobro['fecha'],
-                        descripcion=f"Cobro al paciente {cobro['paciente']} por {cobro['descripcion']}"
-                    )
-
                 return response
 
         return redirect('cobranzas')
+
 
 # -------------------- Pagos View --------------------
 
@@ -1516,11 +1521,19 @@ class PagosView(View):
 
 
 # -------------------- Resumen General View --------------------
+
+from django.db.models import Sum, F, DecimalField
+from django.db.models.functions import Cast
+from decimal import Decimal
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+
 class ResumenGeneralView(View):
     template_name = "resumen_gral.html"
 
     def get(self, request):
-        profesionales = Consulta.objects.values("profesional__nombre", "profesional__apellido").distinct()
+        profesionales = Consulta.objects.values("profesional__id", "profesional__nombre", "profesional__apellido").distinct()
         servicios = Servicio.objects.all()
         return render(request, self.template_name, {"profesionales": profesionales, "servicios": servicios})
 
@@ -1530,19 +1543,104 @@ class ResumenGeneralView(View):
         fecha_hasta = request.POST.get("fecha_hasta")
         servicio_id = request.POST.get("servicio")
 
-        resumen = Consulta.objects.filter(estado_pago="C", estado_prof="C")
+        # Filtrar consultas, informes y sesiones
+        consultas = Consulta.objects.filter(estado_pago="C", estado_prof="C")
+        informes = Informe.objects.filter(estado_pago="C", estado_prof="C")
+        sesiones = SesionDetalle.objects.filter(estado_pago="C", estado_prof="C")
 
         if profesional_id:
-            resumen = resumen.filter(profesional__id=profesional_id)
+            consultas = consultas.filter(profesional__id=profesional_id)
+            informes = informes.filter(profesional__id=profesional_id)
+            sesiones = sesiones.filter(sesion__consulta__profesional__id=profesional_id)
         if fecha_desde and fecha_hasta:
-            resumen = resumen.filter(fecha__range=[fecha_desde, fecha_hasta])
+            consultas = consultas.filter(fecha__range=[fecha_desde, fecha_hasta])
+            informes = informes.filter(fecha_informe__range=[fecha_desde, fecha_hasta])
+            sesiones = sesiones.filter(fecha__range=[fecha_desde, fecha_hasta])
         if servicio_id:
-            resumen = resumen.filter(servicio__id=servicio_id)
+            consultas = consultas.filter(servicio__id=servicio_id)
+            informes = informes.filter(servicio__id=servicio_id)
+            sesiones = sesiones.filter(sesion__servicio__id=servicio_id)
 
-        resumen = resumen.values("profesional__nombre", "servicio__nombre").annotate(
-            total_consultas=Sum("id"),
-            utilidad=Sum("servicio__monto") * 0.3,
+        # Calcular la utilidad por profesional
+        consultas = consultas.values("profesional__nombre", "profesional__apellido").annotate(
+            total_cobrado=Sum(F('servicio__monto')),
+            total_pagado=Sum(F('servicio__monto')) * Decimal('0.3'),
+            utilidad=Sum(F('servicio__monto')) - (Sum(F('servicio__monto')) * Decimal('0.3'))
+        ).annotate(
+            total_cobrado=Cast('total_cobrado', DecimalField(max_digits=10, decimal_places=0)),
+            total_pagado=Cast('total_pagado', DecimalField(max_digits=10, decimal_places=0)),
+            utilidad=Cast('utilidad', DecimalField(max_digits=10, decimal_places=0))
         )
+
+        informes = informes.values("profesional__nombre", "profesional__apellido").annotate(
+            total_cobrado=Sum(F('servicio__monto')),
+            total_pagado=Sum(F('servicio__monto')) * Decimal('0.3'),
+            utilidad=Sum(F('servicio__monto')) - (Sum(F('servicio__monto')) * Decimal('0.3'))
+        ).annotate(
+            total_cobrado=Cast('total_cobrado', DecimalField(max_digits=10, decimal_places=0)),
+            total_pagado=Cast('total_pagado', DecimalField(max_digits=10, decimal_places=0)),
+            utilidad=Cast('utilidad', DecimalField(max_digits=10, decimal_places=0))
+        )
+
+        sesiones = sesiones.values("sesion__consulta__profesional__nombre", "sesion__consulta__profesional__apellido").annotate(
+            total_cobrado=Sum(F('sesion__servicio__monto')),
+            total_pagado=Sum(F('sesion__servicio__monto')) * Decimal('0.3'),
+            utilidad=Sum(F('sesion__servicio__monto')) - (Sum(F('sesion__servicio__monto')) * Decimal('0.3'))
+        ).annotate(
+            total_cobrado=Cast('total_cobrado', DecimalField(max_digits=10, decimal_places=0)),
+            total_pagado=Cast('total_pagado', DecimalField(max_digits=10, decimal_places=0)),
+            utilidad=Cast('utilidad', DecimalField(max_digits=10, decimal_places=0))
+        )
+
+        # Combinar los resultados
+        resumen = list(consultas) + list(informes) + list(sesiones)
+
+        # Generar PDF si se solicita
+        if 'generar_pdf' in request.POST:
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="resumen_general.pdf"'
+            p = canvas.Canvas(response, pagesize=A4)
+            width, height = A4
+            
+            # Encabezado
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, height - 50, "FISIOEMA")
+            p.setFont("Helvetica", 12)
+            p.drawString(width - 200, height - 50, f"Fecha: {datetime.now().strftime('%Y-%m-%d')}")
+            p.drawString(width - 200, height - 70, f"Usuario: {request.user.username}")
+            p.line(50, height - 90, width - 50, height - 90)
+
+            # Contenido
+            y = height - 110
+            total_cobrado_general = 0
+            total_pagado_general = 0
+            total_utilidad_general = 0
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Profesional | Total Cobrado | Total Pagado | Utilidad")
+            y -= 20
+            p.setFont("Helvetica", 10)
+
+            for item in resumen:
+                p.drawString(50, y, f"{item['profesional__nombre']} {item['profesional__apellido']} | {item['total_cobrado']} | {item['total_pagado']} | {item['utilidad']}")
+                total_cobrado_general += item['total_cobrado']
+                total_pagado_general += item['total_pagado']
+                total_utilidad_general += item['utilidad']
+                y -= 20
+                if y < 100:
+                    p.showPage()
+                    y = height - 100
+
+            # Banda de totales
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, f"Total Cobrado: {total_cobrado_general} | Total Pagado: {total_pagado_general} | Utilidad: {total_utilidad_general}")
+
+            # Pie de página
+            p.setFont("Helvetica", 12)
+            p.drawString(50, 30, "FISIOEMA")
+            p.line(50, 40, width - 50, 40)
+            p.showPage()
+            p.save()
+            return response
 
         return render(request, self.template_name, {"resumen": resumen})
 
