@@ -1,31 +1,39 @@
-# views.py
 import json, os, csv
+from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
+
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Count
 from django.db import connection, transaction
-from datetime import date, datetime, timedelta
+from django.db.models import Count, Sum, F, DecimalField
+from django.db.models.functions import Cast
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from reportlab.lib.utils import ImageReader
-from FISIOEMA import settings
-from .models import Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, Profesional, Responsable, Servicio, Area, SesionDetalle, Sesiones
-from .forms import AgendamientoForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
 from django.contrib.auth import login, authenticate, logout
-from .forms import RegistroForm
-from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.views.decorators.csrf import requires_csrf_token
-from django.db.models import Sum
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 from django.utils.timezone import now
-from django.utils import timezone 
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+
+from FISIOEMA import settings
+from .models import (
+    Agendamiento, Consulta, FlujoCaja, HorarioAtencion, Informe, Paciente, 
+    Profesional, Responsable, Servicio, Area, SesionDetalle, Sesiones
+)
+from .forms import (
+    AgendamientoForm, HorarioForm, PacienteForm, ProfesionalForm, RegistroForm, 
+    ResponsableForm, SesionDetalleForm, SesionesForm, InformeForm
+)
+from datetime import date
+from django.db.models import Sum, F, Value
+from django.db.models.functions import Concat
 
 
 #logoutViews
@@ -341,9 +349,6 @@ class ResponsableListView(ListView):
     model = Responsable
     template_name = 'responsable_list.html'
     context_object_name = 'responsables'
-
-
-
 
 
 # Agendamiento - Perfil Admin
@@ -1264,9 +1269,6 @@ class CobranzasView(View):
 
         return redirect('cobranzas')
 
-
-# -------------------- Pagos View --------------------
-
 class PagosView(View):
     template_name = "pagos.html"
 
@@ -1276,98 +1278,77 @@ class PagosView(View):
         fecha_hasta = request.GET.get("fecha_hasta")
         servicio_id = request.GET.get("servicio")
 
-        # Parámetros para la consulta
+        # Construcción dinámica de filtros
+        filtros = []
         params = []
-        filtros = ""
 
         if profesional_id:
-            filtros += " AND p.id = %s"
+            filtros.append("p.id = %s")
             params.append(profesional_id)
 
         if fecha_desde and fecha_hasta:
-            filtros += " AND {table}.fecha BETWEEN %s AND %s"
+            filtros.append("{table}.fecha BETWEEN %s AND %s")
             params.extend([fecha_desde, fecha_hasta])
 
         if servicio_id:
-            filtros += " AND ser.id = %s"
+            filtros.append("ser.id = %s")
             params.append(servicio_id)
+
+        where_clause = " AND ".join(filtros)
+        where_clause = f"AND {where_clause}" if where_clause else ""
 
         sql = f"""
         SELECT 
-            c.fecha AS fecha,
-            c.diagnostico AS descripcion,
-            ser.nombre AS servicio,
-            p.nombre || ' ' || p.apellido AS profesional,
-            ser.monto * 0.7 AS monto,
-            'Consulta' as tipo
+            c.id AS id, c.fecha AS fecha, c.diagnostico AS descripcion,
+            ser.nombre AS servicio, p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto, 'Consulta' as tipo
         FROM 
             fisio_consulta c
-        INNER JOIN 
-            fisio_servicio ser ON ser.id = c.servicio_id
-        INNER JOIN 
-            fisio_profesional p ON p.id = c.profesional_id
-        WHERE 
-            c.estado_prof IN ('P', 'Pendiente')
-            {filtros.format(table='c')}
+        INNER JOIN fisio_servicio ser ON ser.id = c.servicio_id
+        INNER JOIN fisio_profesional p ON p.id = c.profesional_id
+        WHERE c.estado_prof IN ('P', 'Pendiente') {where_clause.format(table='c')}
         
         UNION ALL
         
         SELECT 
-            i.fecha_informe AS fecha,
-            i.descripcion AS descripcion,
-            ser.nombre AS servicio,
-            p.nombre || ' ' || p.apellido AS profesional,
-            ser.monto * 0.7 AS monto,
-            'Informe' as tipo
+            i.id AS id, i.fecha_informe AS fecha, i.descripcion AS descripcion,
+            ser.nombre AS servicio, p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto, 'Informe' as tipo
         FROM 
             fisio_informe i
-        INNER JOIN 
-            fisio_servicio ser ON ser.id = i.servicio_id
-        INNER JOIN 
-            fisio_profesional p ON p.id = i.profesional_id
-        WHERE 
-            i.estado_prof IN ('P', 'Pendiente')
-            {filtros.replace('fecha', 'fecha_informe').format(table='i')}
+        INNER JOIN fisio_servicio ser ON ser.id = i.servicio_id
+        INNER JOIN fisio_profesional p ON p.id = i.profesional_id
+        WHERE i.estado_prof IN ('P', 'Pendiente') {where_clause.replace('fecha', 'fecha_informe').format(table='i')}
         
         UNION ALL
         
         SELECT 
-            sd.fecha AS fecha,
-            sd.observaciones AS descripcion,
-            ser.nombre AS servicio,
-            p.nombre || ' ' || p.apellido AS profesional,
-            ser.monto * 0.7 AS monto,
-            'Sesión' as tipo
+            sd.id AS id, sd.fecha AS fecha, sd.observaciones AS descripcion,
+            ser.nombre AS servicio, p.nombre || ' ' || p.apellido AS profesional,
+            ser.monto * 0.7 AS monto, 'Sesión' as tipo
         FROM 
             fisio_sesiondetalle sd
-        INNER JOIN 
-            fisio_sesiones s ON s.id = sd.sesion_id
-        INNER JOIN 
-            fisio_consulta c ON c.id = s.consulta_id
-        INNER JOIN 
-            fisio_servicio ser ON ser.id = s.servicio_id
-        INNER JOIN 
-            fisio_profesional p ON p.id = c.profesional_id
-        WHERE 
-            sd.estado_prof IN ('P', 'Pendiente')
-            {filtros.format(table='sd')}
+        INNER JOIN fisio_sesiones s ON s.id = sd.sesion_id
+        INNER JOIN fisio_consulta c ON c.id = s.consulta_id
+        INNER JOIN fisio_servicio ser ON ser.id = s.servicio_id
+        INNER JOIN fisio_profesional p ON p.id = c.profesional_id
+        WHERE sd.estado_prof IN ('P', 'Pendiente') {where_clause.format(table='sd')}
         ORDER BY fecha DESC
         """
 
-        # Ejecutar la consulta SQL
         with connection.cursor() as cursor:
-            cursor.execute(sql, params * 3)  # Multiplicamos los parámetros por 3 debido al UNION ALL
+            cursor.execute(sql, params * 3)
             resultados = cursor.fetchall()
 
-        # Convertir los resultados a un diccionario
         pagos = [
             {
-                'fecha': row[0],
-                'descripcion': row[1],
-                'servicio': row[2],
-                'profesional': row[3],
-                'monto': row[4],
-                'tipo': row[5]
+                'id': row[0],
+                'fecha': row[1],
+                'descripcion': row[2],
+                'servicio': row[3],
+                'profesional': row[4],
+                'monto': row[5],
+                'tipo': row[6],
             }
             for row in resultados
         ]
@@ -1376,8 +1357,8 @@ class PagosView(View):
         servicios = Servicio.objects.all()
 
         context = {
-            "pagos": pagos, 
-            "profesionales": profesionales, 
+            "pagos": pagos,
+            "profesionales": profesionales,
             "servicios": servicios,
             "filtros": {
                 "profesional_id": profesional_id,
@@ -1388,52 +1369,102 @@ class PagosView(View):
         }
 
         return render(request, self.template_name, context)
+    
 
     def post(self, request):
         seleccionados = request.POST.getlist('seleccionados')
-        
+
         if seleccionados:
             with transaction.atomic():
-                # Actualizar el estado a 'Cancelado'
-                SesionDetalle.objects.filter(id__in=seleccionados).update(estado_prof='C')
-                Consulta.objects.filter(id__in=seleccionados).update(estado_prof='C')
-                Informe.objects.filter(id__in=seleccionados).update(estado_prof='C')
+                ids = [int(id) for id in seleccionados]
+
+                # Inicializar variables para cálculo y descripción
+                total_monto = 0
+                profesionales_unicos = set()
+                descripcion = "Pagos profesionales"
+
+                # Obtener pagos desde SesionDetalle
+                sesion_detalle_pagos = SesionDetalle.objects.filter(id__in=ids).select_related('sesion__consulta__profesional').annotate(
+                    monto=F('sesion__consulta__servicio__monto'),
+                    profesional=Concat(F('sesion__consulta__profesional__nombre'), Value(' '), F('sesion__consulta__profesional__apellido'))
+                ).values('monto', 'profesional')
+                
+                # Acumular datos
+                for pago in sesion_detalle_pagos:
+                    total_monto += pago['monto']
+                    profesionales_unicos.add(pago['profesional'])
+
+                # Cambiar estado a 'C' en los objetos seleccionados
+                SesionDetalle.objects.filter(id__in=ids).update(estado_prof='C')
+
+                # Si hay un único profesional, actualizar la descripción
+                if len(profesionales_unicos) == 1:
+                    descripcion = f"Pago al profesional {list(profesionales_unicos)[0]}"
+
+                # Registrar el pago en FlujoCaja
+                fecha_hoy = date.today()
+                FlujoCaja.objects.create(
+                    monto=total_monto,
+                    fecha=fecha_hoy,
+                    tipo_operacion = 'P'
+                )
 
                 # Generar PDF
                 response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename="pagos_profesional.pdf"'
                 p = canvas.Canvas(response)
                 p.drawString(100, 800, "Pagos al Profesional")
-                y = 750
-                for pago in seleccionados:
-                    p.drawString(100, y, f"Fecha: {pago['fecha']}, Descripción: {pago['descripcion']}, Servicio: {pago['servicio']}, Monto: {pago['monto']}")
-                    y -= 20
+                p.drawString(100, 780, f"Fecha de pago: {fecha_hoy}")
+                p.drawString(100, 740, f"Monto total: {total_monto}")
                 p.showPage()
                 p.save()
-
-                # Registrar operación en flujo de caja
-                for pago in seleccionados:
-                    FlujoCaja.objects.create(
-                        concepto='Salida de dinero',
-                        monto=pago['monto'],
-                        fecha=pago['fecha'],
-                        descripcion=f"Pago al profesional {pago['profesional']} por {pago['descripcion']}"
-                    )
 
                 return response
 
         return redirect('pagos_profesionales')
 
 
+# -------------------- Flujo de Caja View --------------------
+class FlujoCajaView(View):
+    template_name = "flujo_caja_form.html"
 
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        persona = request.POST.get("persona")
+        monto = request.POST.get("monto")
+        tipo_pago = request.POST.get("tipo_pago")
+
+        FlujoCaja.objects.create(
+            persona=persona,
+            fecha=request.POST.get("fecha"),
+            monto=monto,
+            tipo_operacion="R",  # Recibo
+            medio_pago=tipo_pago,
+        )
+
+        # Actualizar estados de las consultas seleccionadas
+        consulta_ids = request.POST.getlist("consulta_ids")
+        Consulta.objects.filter(id__in=consulta_ids).update(estado_pago="C")
+
+        # Generar PDF
+        pdf_data = {
+            "fecha_operacion": request.POST.get("fecha"),
+            "persona": persona,
+            "concepto": "Recibo",
+            "monto": monto,
+            "tipo_pago": tipo_pago,
+        }
+
+
+        
+        # pdf = generate_pdf(pdf_data)
+
+        # return HttpResponse(pdf, content_type="application/pdf")
 # -------------------- Resumen General View --------------------
 
-from django.db.models import Sum, F, DecimalField
-from django.db.models.functions import Cast
-from decimal import Decimal
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
+
 
 class ResumenGeneralView(View):
     template_name = "resumen_gral.html"
@@ -1549,40 +1580,3 @@ class ResumenGeneralView(View):
             return response
 
         return render(request, self.template_name, {"resumen": resumen})
-
-# -------------------- Flujo de Caja View --------------------
-class FlujoCajaView(View):
-    template_name = "flujo_caja_form.html"
-
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        persona = request.POST.get("persona")
-        monto = request.POST.get("monto")
-        tipo_pago = request.POST.get("tipo_pago")
-
-        FlujoCaja.objects.create(
-            persona=persona,
-            fecha=request.POST.get("fecha"),
-            monto=monto,
-            tipo_operacion="R",  # Recibo
-            medio_pago=tipo_pago,
-        )
-
-        # Actualizar estados de las consultas seleccionadas
-        consulta_ids = request.POST.getlist("consulta_ids")
-        Consulta.objects.filter(id__in=consulta_ids).update(estado_pago="C")
-
-        # Generar PDF
-        pdf_data = {
-            "fecha_operacion": request.POST.get("fecha"),
-            "persona": persona,
-            "concepto": "Recibo",
-            "monto": monto,
-            "tipo_pago": tipo_pago,
-        }
-        # pdf = generate_pdf(pdf_data)
-
-        # return HttpResponse(pdf, content_type="application/pdf")
-

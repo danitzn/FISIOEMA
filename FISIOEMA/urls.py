@@ -129,7 +129,7 @@ urlpatterns = [
     path('responsable/<int:pk>/', ResponsableDetailView.as_view(), name='responsable_detail'),
     path('responsables/', ResponsableListView.as_view(), name='responsable_list'), 
 
-     path("cobranzas/", CobranzasView.as_view(), name="cobranzas"),
+    path("cobranzas/", CobranzasView.as_view(), name="cobranzas"),
     
     
     # Pagos al Profesional

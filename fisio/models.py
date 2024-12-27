@@ -545,7 +545,7 @@ class Informe(models.Model):
 
 
 class FlujoCaja(models.Model):
-    persona = models.CharField(max_length=20, null=True, blank=True)  # CI de paciente, profesional, o ninguno
+    persona = models.CharField(max_length=20, null=True, blank=True)
     fecha = models.DateField(auto_now_add=True)
     monto = models.DecimalField(max_digits=10, decimal_places=0)
     TIPO_OPERACION_CHOICES = [
